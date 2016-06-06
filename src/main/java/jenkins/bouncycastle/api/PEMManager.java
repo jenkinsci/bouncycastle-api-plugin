@@ -46,6 +46,7 @@ import org.apache.commons.codec.binary.Hex;
 import org.apache.commons.io.FileUtils;
 import org.bouncycastle.openssl.PEMReader;
 import org.bouncycastle.openssl.PEMWriter;
+import org.bouncycastle.openssl.PasswordException;
 import org.bouncycastle.openssl.PasswordFinder;
 import org.bouncycastle.util.encoders.Base64;
 
@@ -66,9 +67,22 @@ public class PEMManager {
      * 
      * @param pemFile {@link File} pointing to the PEM file to read
      * @throws IOException launched if a problem exists reading the PEM information or the {@link File}
+     * @throws BCPasswordException in case PEM is passphrase protected and none or wrong is provided
      */
     public PEMManager(@Nonnull File pemFile) throws IOException {
-        decodePEM(pemFile);
+        decodePEM(pemFile, null);
+    }
+
+    /**
+     * Creates a {@link PEMManager} by reading a PEM file
+     * 
+     * @param pemFile {@link File} pointing to the PEM file to read
+     * @param passphrase passphrase for the encrypted PEM data. null if PEM data is not passphrase protected
+     * @throws IOException launched if a problem exists reading the PEM information or the {@link File}
+     * @throws BCPasswordException in case PEM is passphrase protected and none or wrong is provided
+     */
+    public PEMManager(@Nonnull File pemFile, @Nullable String passphrase) throws IOException {
+        decodePEM(pemFile, passphrase);
     }
 
     /**
@@ -76,23 +90,22 @@ public class PEMManager {
      * 
      * @param pem {@link String} with the PEM data
      * @throws IOException launched if a problem exists reading the PEM information
+     * @throws BCPasswordException in case PEM is passphrase protected and none or wrong is provided
      */
     public PEMManager(@Nonnull String pem) throws IOException {
-        decodePEM(pem);
+        decodePEM(pem, null);
+    }
 
-        // TODO: Decide what to do with Password protected PEMs
-
-        // try {
-        // decodePEM(pem, new PasswordFinder() {
-        // public char[] getPassword() {
-        // throw new BCPrivateKeyWithPassword();
-        // }
-        // });
-        // } catch (BCPrivateKeyWithPassword e) {
-        // throw new BCException(
-        // "This private key is password protected, which isn't supported yet");
-        // }
-
+    /**
+     * Creates a {@link PEMManager} by reading PEM formated data from a {@link String}
+     * 
+     * @param pem {@link String} with the PEM data
+     * @param passphrase passphrase for the encrypted PEM data. null if PEM data is not passphrase protected
+     * @throws IOException launched if a problem exists reading the PEM information
+     * @throws BCPasswordException in case PEM is passphrase protected and none or wrong is provided
+     */
+    public PEMManager(@Nonnull String pem, @Nullable String passphrase) throws IOException {
+        decodePEM(pem, passphrase);
     }
 
     /**
@@ -106,18 +119,26 @@ public class PEMManager {
         this.pemObject = pemObject;
     }
 
-    private void decodePEM(@Nonnull File pemFile) throws IOException {
-        decodePEM(FileUtils.readFileToString(pemFile));
+    private void decodePEM(@Nonnull File pemFile, @Nullable String passphrase) throws IOException {
+        decodePEM(FileUtils.readFileToString(pemFile), passphrase);
     }
 
-    private void decodePEM(@Nonnull String pem) throws IOException {
-        decodePEM(pem, null);
-    }
+    private void decodePEM(@Nonnull String pem, @Nullable final String passphrase) throws IOException {
+        PasswordFinder pwf = null;
+        if (passphrase != null) {
+            pwf = new PasswordFinder() {
+                @Override
+                public char[] getPassword() {
+                    return passphrase.toCharArray();
+                }
+            };
+        }
 
-    private void decodePEM(@Nonnull String pem, @Nullable PasswordFinder pwf) throws IOException {
         PEMReader parser = new PEMReader(new StringReader(pem), pwf);
         try {
             pemObject = parser.readObject();
+        } catch (PasswordException pwE) {
+            throw new BCPasswordException(pwE);
         } finally {
             parser.close();
         }
@@ -154,11 +175,11 @@ public class PEMManager {
 
     /**
      * Obtain {@link KeyPair} object with the public and private key from the read PEM. No conversion is performed, the
-     * read PEM must contain private and public key in order to obtain a {@link KeyPair} object, null will be
-     * returned in all the other cases.
+     * read PEM must contain private and public key in order to obtain a {@link KeyPair} object, null will be returned
+     * in all the other cases.
      * 
-     * @return {@link KeyPair} object with public and private keys or null if the read PEM didn't contain
-     * private and public keys.
+     * @return {@link KeyPair} object with public and private keys or null if the read PEM didn't contain private and
+     * public keys.
      */
     @Nullable
     public KeyPair getKeyPair() {

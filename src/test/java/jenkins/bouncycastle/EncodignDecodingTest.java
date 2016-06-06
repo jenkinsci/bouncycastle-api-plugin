@@ -51,7 +51,9 @@ public class EncodignDecodingTest {
     // private static final String SIGNATURE =
     // "XD8DdwOkX+o0huK8N/QS/AJyuL4mpj5lJlXlTYQZOyYoCJ892rY4Q12IDUPIT7nxBTQsqf6SIAaQda5OhBb+0RGHk5A770ANfe+OMtxBuIvhirorJ2RWjeZ+nWi6WEwSpYurBi5w73PdPJLth8MT5LmjQhKqnuFF6N/S5iyKGt108d8YAkHGDXGcRQE+AFYMaDpCqAAWhngPqe8WbbSrRwsUHXdEuAXgvlhJ0bwaK7WsConlk8fpBOQ7v9MKgfX7ww1VleDydReGzC6V2ayhXAbDs8Sp00hgc1LS/uPyumzztXqVRzkVLY3RZzASQVdM99a0WhOWdvc2W3Ycg1chKA==";
     private static File PRIVATE_KEY_PEM;
+    private static File PRIVATE_KEY_PW_PEM;
     private static File PUBLIC_KEY_PEM;
+    private static String PRIVATE_KEY_PW = "test";
 
     @Rule
     public TemporaryFolder folder = new TemporaryFolder();
@@ -59,12 +61,24 @@ public class EncodignDecodingTest {
     @BeforeClass
     public static void setUpClass() throws URISyntaxException {
         PRIVATE_KEY_PEM = new File(EncodignDecodingTest.class.getClassLoader().getResource("private-key.pem").toURI());
+        PRIVATE_KEY_PW_PEM = new File(
+                EncodignDecodingTest.class.getClassLoader().getResource("private-key-with-password.pem").toURI());
         PUBLIC_KEY_PEM = new File(EncodignDecodingTest.class.getClassLoader().getResource("public-key.pem").toURI());
     }
 
     @Test
     public void testReadPrivateKeyPEM() throws Exception {
         PEMManager pemManager = new PEMManager(new File(PRIVATE_KEY_PEM.toURI()));
+
+        assertEquals(PEMManager.encodeBase64(pemManager.getKeyPair().getPrivate().getEncoded()),
+                PEMManager.encodeBase64(pemManager.getPrivateKey().getEncoded()));
+        assertEquals(PUBLIC_KEY, PEMManager.encodeBase64(pemManager.getKeyPair().getPublic().getEncoded()));
+        assertEquals(PUBLIC_KEY, PEMManager.encodeBase64(pemManager.getPublicKey().getEncoded()));
+    }
+
+    @Test
+    public void testReadPrivateKeyWithPasswordPEM() throws Exception {
+        PEMManager pemManager = new PEMManager(new File(PRIVATE_KEY_PW_PEM.toURI()));
 
         assertEquals(PEMManager.encodeBase64(pemManager.getKeyPair().getPrivate().getEncoded()),
                 PEMManager.encodeBase64(pemManager.getPrivateKey().getEncoded()));
