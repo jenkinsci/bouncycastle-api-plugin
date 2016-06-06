@@ -214,6 +214,16 @@ public class PEMManager {
         }
         return null;
     }
+    
+    /**
+     * Obtains raw JCA or BouncyCastle {@link Object} from the read PEM. 
+     * 
+     * @return {@link Object} read from the PEM
+     */
+    @Nullable
+    public Object getRawObject() {
+        return pemObject;
+    }
 
     /**
      * Obtains the fingerprint of the private key in the "ab:cd:ef:...:12" format, which basically is an SHA1 digest
