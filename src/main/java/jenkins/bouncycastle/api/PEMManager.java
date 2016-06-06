@@ -226,8 +226,9 @@ public class PEMManager {
     @Nullable
     public String getPrivateKeyFingerprint() throws IOException {
         PrivateKey key = getPrivateKey();
-        if (key == null)
+        if (key == null) {
             return null;
+        }
         return hexEncode(getKeyDigestSHA1(key));
     }
 
@@ -242,8 +243,9 @@ public class PEMManager {
     @Nullable
     public String getPublicKeyFingerprint() throws IOException {
         PublicKey key = getPublicKey();
-        if (key == null)
+        if (key == null) {
             return null;
+        }
         return hexEncode(getKeyDigestMD5(key));
     }
 
