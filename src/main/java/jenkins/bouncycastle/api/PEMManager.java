@@ -59,7 +59,7 @@ public class PEMManager {
     /**
      * Stores the internal Bouncy Castle or JCA object
      */
-    Object pemObject;
+    private Object pemObject;
 
     /**
      * Creates a {@link PEMManager} by reading a PEM file
@@ -106,15 +106,15 @@ public class PEMManager {
         this.pemObject = pemObject;
     }
 
-    protected void decodePEM(@Nonnull File pemFile) throws IOException {
+    private void decodePEM(@Nonnull File pemFile) throws IOException {
         decodePEM(FileUtils.readFileToString(pemFile));
     }
 
-    protected void decodePEM(@Nonnull String pem) throws IOException {
+    private void decodePEM(@Nonnull String pem) throws IOException {
         decodePEM(pem, null);
     }
 
-    protected void decodePEM(@Nonnull String pem, @Nullable PasswordFinder pwf) throws IOException {
+    private void decodePEM(@Nonnull String pem, @Nullable PasswordFinder pwf) throws IOException {
         PEMReader parser = new PEMReader(new StringReader(pem), pwf);
         try {
             pemObject = parser.readObject();
