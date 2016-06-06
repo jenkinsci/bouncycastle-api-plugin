@@ -214,9 +214,31 @@ public class PEMManager {
         }
         return null;
     }
-    
+
     /**
-     * Obtains raw JCA or BouncyCastle {@link Object} from the read PEM. 
+     * Obtains raw JCA or BouncyCastle {@link Object} from the read PEM. Depending on the PEM nature or the object
+     * passed to the {@link #PEMManager(Object pemObject)}, the returned object can be one of the following (not
+     * exhaustive list) and any classes that inherit from them:
+     * <ul>
+     * <li><strong>JCA</strong></li>
+     * <ul>
+     * <li>{@link Certificate}</li>
+     * <li>{@link KeyPair}</li>
+     * <li>{@link PublicKey}</li>
+     * <li>{@link PrivateKey}</li>
+     * </ul>
+     * </ul>
+     * <ul>
+     * <li><strong>Bouncy Castle</strong></li>
+     * <ul>
+     * <li>{@link ContentInfo}</li>
+     * <li>{@link CRL}</li>
+     * <li>{@link ECNamedCurveParameterSpec}</li>
+     * <li>{@link PKCS10CertificationRequest}</li>
+     * <li>{@link X509CertificateObject}</li>
+     * <li>{@link X509V2AttributeCertificate}</li>
+     * </ul>
+     * </ul>
      * 
      * @return {@link Object} read from the PEM
      */
