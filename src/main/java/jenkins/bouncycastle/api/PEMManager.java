@@ -144,6 +144,8 @@ public class PEMManager {
     /**
      * Encodes the current stored information in PEM formated {@link File}
      * 
+     * @param pemFile PEM {@link File} to read
+     * 
      * @throws IOException launched if a problem exists generating the PEM information or writing the {@link File}
      */
     public void encodePEM(@Nonnull File pemFile) throws IOException {
@@ -152,10 +154,10 @@ public class PEMManager {
 
     /**
      * Obtain {@link KeyPair} object with the public and private key from the read PEM. No conversion is performed, the
-     * read PEM must contain private and public key in order to obtain a {@link KeyPair} object, {@link null} will be
+     * read PEM must contain private and public key in order to obtain a {@link KeyPair} object, null will be
      * returned in all the other cases.
      * 
-     * @return {@link KeyPair} object with public and private keys or {@link null} if the read PEM didn't contain
+     * @return {@link KeyPair} object with public and private keys or null if the read PEM didn't contain
      * private and public keys.
      */
     @Nullable
@@ -220,23 +222,23 @@ public class PEMManager {
      * passed to the {@link #PEMManager(Object pemObject)}, the returned object can be one of the following (not
      * exhaustive list) and any classes that inherit from them:
      * <ul>
-     * <li><strong>JCA</strong></li>
+     * <li><strong>JCA</strong>
      * <ul>
-     * <li>{@link Certificate}</li>
-     * <li>{@link KeyPair}</li>
-     * <li>{@link PublicKey}</li>
-     * <li>{@link PrivateKey}</li>
+     * <li>{@link Certificate}
+     * <li>{@link java.security.cert.CRL}
+     * <li>{@link KeyPair}
+     * <li>{@link PublicKey}
+     * <li>{@link PrivateKey}
      * </ul>
      * </ul>
      * <ul>
-     * <li><strong>Bouncy Castle</strong></li>
+     * <li><strong>Bouncy Castle</strong>
      * <ul>
-     * <li>{@link ContentInfo}</li>
-     * <li>{@link CRL}</li>
-     * <li>{@link ECNamedCurveParameterSpec}</li>
-     * <li>{@link PKCS10CertificationRequest}</li>
-     * <li>{@link X509CertificateObject}</li>
-     * <li>{@link X509V2AttributeCertificate}</li>
+     * <li>{@link org.bouncycastle.asn1.cms.ContentInfo}
+     * <li>{@link org.bouncycastle.jce.spec.ECNamedCurveParameterSpec}
+     * <li>{@link org.bouncycastle.pkcs.PKCS10CertificationRequest}
+     * <li>{@link org.bouncycastle.jce.provider.X509CertificateObject}
+     * <li>{@link org.bouncycastle.x509.X509V2AttributeCertificate}
      * </ul>
      * </ul>
      * 

@@ -87,6 +87,7 @@
       <groupId>org.bouncycastle</groupId>
       <artifactId>bcpkix-jdk15on</artifactId>
       <version>1.47</version>
+      <scope>provided</scope>
     </dependency>
     <!-- plugin dependencies -->
     <!-- jenkins dependencies -->
