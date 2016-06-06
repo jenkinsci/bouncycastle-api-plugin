@@ -1,7 +1,7 @@
 /*
  * The MIT License
  *
- * Copyright (c) 2004-, Kohsuke Kawaguchi, Sun Microsystems, Inc., and a number of other of contributors
+ * Copyright (c) 2016, CloudBees, Inc.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -21,6 +21,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
+
 package jenkins.bouncycastle;
 
 import static org.junit.Assert.assertEquals;
@@ -36,7 +37,7 @@ import org.junit.Test;
 import jenkins.bouncycastle.api.PEMManager;
 
 public class FingerPrintTest {
-    
+
     private static File PEM_FILE;
     private static final String PRIVATE_KEY_FP = "3c:ee:c2:12:57:5f:d0:73:79:38:d6:aa:ef:91:0a:b8:2c:5f:47:65";
     private static final String PUBLIC_KEY_FP = "e3:cc:f6:5d:0b:bb:8b:ca:32:12:fd:70:98:57:c0:21";
@@ -44,7 +45,8 @@ public class FingerPrintTest {
     @BeforeClass
     public static void setUpBC() throws URISyntaxException {
         Security.addProvider(new org.bouncycastle.jce.provider.BouncyCastleProvider());
-        PEM_FILE = new File(EncodignDecodingTest.class.getClassLoader().getResource("private-key-fingerprint.pem").toURI());
+        PEM_FILE = new File(
+                EncodignDecodingTest.class.getClassLoader().getResource("private-key-fingerprint.pem").toURI());
     }
 
     @Test
