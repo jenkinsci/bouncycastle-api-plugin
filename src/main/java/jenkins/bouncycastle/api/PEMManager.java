@@ -39,6 +39,7 @@ import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.security.cert.Certificate;
 
+import javax.annotation.CheckForNull;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
@@ -70,7 +71,7 @@ public class PEMManager {
      * @throws BCPasswordException in case PEM is passphrase protected and none or wrong is provided
      */
     public PEMManager(@Nonnull File pemFile) throws IOException {
-        decodePEM(pemFile, null);
+        decode(pemFile, null);
     }
 
     /**
@@ -82,7 +83,7 @@ public class PEMManager {
      * @throws BCPasswordException in case PEM is passphrase protected and none or wrong is provided
      */
     public PEMManager(@Nonnull File pemFile, @Nullable String passphrase) throws IOException {
-        decodePEM(pemFile, passphrase);
+        decode(pemFile, passphrase);
     }
 
     /**
@@ -93,7 +94,7 @@ public class PEMManager {
      * @throws BCPasswordException in case PEM is passphrase protected and none or wrong is provided
      */
     public PEMManager(@Nonnull String pem) throws IOException {
-        decodePEM(pem, null);
+        decode(pem, null);
     }
 
     /**
@@ -105,7 +106,7 @@ public class PEMManager {
      * @throws BCPasswordException in case PEM is passphrase protected and none or wrong is provided
      */
     public PEMManager(@Nonnull String pem, @Nullable String passphrase) throws IOException {
-        decodePEM(pem, passphrase);
+        decode(pem, passphrase);
     }
 
     /**
@@ -119,11 +120,11 @@ public class PEMManager {
         this.object = pemObject;
     }
 
-    private void decodePEM(@Nonnull File pemFile, @Nullable String passphrase) throws IOException {
-        decodePEM(FileUtils.readFileToString(pemFile), passphrase);
+    private void decode(@Nonnull File pemFile, @Nullable String passphrase) throws IOException {
+        decode(FileUtils.readFileToString(pemFile), passphrase);
     }
 
-    private void decodePEM(@Nonnull String pem, @Nullable final String passphrase) throws IOException {
+    private void decode(@Nonnull String pem, @Nullable final String passphrase) throws IOException {
         PasswordFinder pwf = null;
         if (passphrase != null) {
             pwf = new PasswordFinder() {
@@ -151,7 +152,7 @@ public class PEMManager {
      * @throws IOException launched if a problem exists generating the PEM information
      */
     @Nonnull
-    public String encodePEM() throws IOException {
+    public String encode() throws IOException {
         StringWriter sw = new StringWriter();
         PEMWriter w = new PEMWriter(sw);
         try {
@@ -169,8 +170,8 @@ public class PEMManager {
      * 
      * @throws IOException launched if a problem exists generating the PEM information or writing the {@link File}
      */
-    public void encodePEM(@Nonnull File pemFile) throws IOException {
-        FileUtils.writeStringToFile(pemFile, encodePEM());
+    public void encode(@Nonnull File pemFile) throws IOException {
+        FileUtils.writeStringToFile(pemFile, encode());
     }
 
     /**
@@ -181,7 +182,7 @@ public class PEMManager {
      * @return {@link KeyPair} object with public and private keys or null if the read PEM didn't contain private and
      * public keys.
      */
-    @Nullable
+    @CheckForNull
     public KeyPair toKeyPair() {
         if (object instanceof KeyPair) {
             return (KeyPair) object;
@@ -195,7 +196,7 @@ public class PEMManager {
      * 
      * @return {@link PublicKey} with the public key, null if a public key could not be obtained from the current data
      */
-    @Nullable
+    @CheckForNull
     public PublicKey toPublicKey() {
         if (object instanceof PublicKey) {
             return (PublicKey) object;
@@ -213,7 +214,7 @@ public class PEMManager {
      * @return {@link Certificate} with the certificate, null if a certificate could not be obtained from the current
      * data
      */
-    @Nullable
+    @CheckForNull
     public Certificate toCertificate() {
         if (object instanceof Certificate) {
             return ((Certificate) object);
@@ -228,7 +229,7 @@ public class PEMManager {
      * @return {@link PrivateKey} with the private key, null if a private key could not be obtained from the current
      * data
      */
-    @Nullable
+    @CheckForNull
     public PrivateKey toPrivateKey() {
         if (object instanceof PrivateKey) {
             return (PrivateKey) object;
@@ -265,7 +266,7 @@ public class PEMManager {
      * 
      * @return {@link Object} read from the PEM
      */
-    @Nullable
+    @CheckForNull
     public Object getRawObject() {
         return object;
     }
@@ -278,7 +279,7 @@ public class PEMManager {
      * from the current PEM data.
      * @throws IOException thrown if a problem exists creating the fingerprint
      */
-    @Nullable
+    @CheckForNull
     public String getPrivateKeyFingerprint() throws IOException {
         PrivateKey key = toPrivateKey();
         if (key == null) {
@@ -295,7 +296,7 @@ public class PEMManager {
      * the current PEM data.
      * @throws IOException if a problem exists creating the fingerprint
      */
-    @Nullable
+    @CheckForNull
     public String getPublicKeyFingerprint() throws IOException {
         PublicKey key = toPublicKey();
         if (key == null) {
