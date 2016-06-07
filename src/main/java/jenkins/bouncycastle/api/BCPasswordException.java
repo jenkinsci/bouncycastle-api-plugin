@@ -24,6 +24,9 @@
 
 package jenkins.bouncycastle.api;
 
+/**
+ * Indicates a password or passphrase is needed and none or a wrong one was provided
+ */
 public class BCPasswordException extends RuntimeException {
     static final long serialVersionUID = 1L;
 
