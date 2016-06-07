@@ -38,7 +38,8 @@ import hudson.init.Initializer;
 
 /**
  * Initialization class to register Bouncy Castle as a security provider.
- *
+ * 
+ * @since 1.0
  */
 public class SecurityProviderInitializer extends Plugin {
 

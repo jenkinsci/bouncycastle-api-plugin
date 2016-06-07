@@ -24,13 +24,11 @@
 
 package jenkins.bouncycastle.api;
 
-import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.StringReader;
 import java.io.StringWriter;
 import java.nio.charset.StandardCharsets;
-import java.security.DigestInputStream;
 import java.security.Key;
 import java.security.KeyPair;
 import java.security.MessageDigest;
@@ -55,6 +53,7 @@ import org.bouncycastle.util.encoders.Base64;
  * A class that provides an API to manager PEM format, providing additional methods to handle Keys, Certificates,
  * Fingerprints, etc The supported algorithms will depend on the underlying version of BouncyCastle
  *
+ * @since 1.0
  */
 public class PEMManager {
 
