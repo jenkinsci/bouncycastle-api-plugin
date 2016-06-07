@@ -60,7 +60,7 @@ public class PEMManager {
     /**
      * Stores the internal Bouncy Castle or JCA object
      */
-    private Object pemObject;
+    private Object object;
 
     /**
      * Creates a {@link PEMManager} by reading a PEM file
@@ -116,7 +116,7 @@ public class PEMManager {
      * @param pemObject object to manage
      */
     public PEMManager(@Nonnull Object pemObject) {
-        this.pemObject = pemObject;
+        this.object = pemObject;
     }
 
     private void decodePEM(@Nonnull File pemFile, @Nullable String passphrase) throws IOException {
@@ -136,7 +136,7 @@ public class PEMManager {
 
         PEMReader parser = new PEMReader(new StringReader(pem), pwf);
         try {
-            pemObject = parser.readObject();
+            object = parser.readObject();
         } catch (PasswordException pwE) {
             throw new BCPasswordException(pwE);
         } finally {
@@ -155,7 +155,7 @@ public class PEMManager {
         StringWriter sw = new StringWriter();
         PEMWriter w = new PEMWriter(sw);
         try {
-            w.writeObject(pemObject);
+            w.writeObject(object);
         } finally {
             w.close();
         }
@@ -182,9 +182,9 @@ public class PEMManager {
      * public keys.
      */
     @Nullable
-    public KeyPair getKeyPair() {
-        if (pemObject instanceof KeyPair) {
-            return (KeyPair) pemObject;
+    public KeyPair toKeyPair() {
+        if (object instanceof KeyPair) {
+            return (KeyPair) object;
         } // We will need conversion here on BC 1.54
         return null;
     }
@@ -196,13 +196,13 @@ public class PEMManager {
      * @return {@link PublicKey} with the public key, null if a public key could not be obtained from the current data
      */
     @Nullable
-    public PublicKey getPublicKey() {
-        if (pemObject instanceof PublicKey) {
-            return (PublicKey) pemObject;
-        } else if (pemObject instanceof KeyPair) {
-            return ((KeyPair) pemObject).getPublic();
-        } else if (pemObject instanceof Certificate) {
-            return ((Certificate) pemObject).getPublicKey();
+    public PublicKey toPublicKey() {
+        if (object instanceof PublicKey) {
+            return (PublicKey) object;
+        } else if (object instanceof KeyPair) {
+            return ((KeyPair) object).getPublic();
+        } else if (object instanceof Certificate) {
+            return ((Certificate) object).getPublicKey();
         }
         return null;
     }
@@ -214,9 +214,9 @@ public class PEMManager {
      * data
      */
     @Nullable
-    public Certificate getCertificate() {
-        if (pemObject instanceof Certificate) {
-            return ((Certificate) pemObject);
+    public Certificate toCertificate() {
+        if (object instanceof Certificate) {
+            return ((Certificate) object);
         }
         return null;
     }
@@ -229,11 +229,11 @@ public class PEMManager {
      * data
      */
     @Nullable
-    public PrivateKey getPrivateKey() {
-        if (pemObject instanceof PrivateKey) {
-            return (PrivateKey) pemObject;
-        } else if (pemObject instanceof KeyPair) {
-            return ((KeyPair) pemObject).getPrivate();
+    public PrivateKey toPrivateKey() {
+        if (object instanceof PrivateKey) {
+            return (PrivateKey) object;
+        } else if (object instanceof KeyPair) {
+            return ((KeyPair) object).getPrivate();
         }
         return null;
     }
@@ -267,7 +267,7 @@ public class PEMManager {
      */
     @Nullable
     public Object getRawObject() {
-        return pemObject;
+        return object;
     }
 
     /**
@@ -280,7 +280,7 @@ public class PEMManager {
      */
     @Nullable
     public String getPrivateKeyFingerprint() throws IOException {
-        PrivateKey key = getPrivateKey();
+        PrivateKey key = toPrivateKey();
         if (key == null) {
             return null;
         }
@@ -297,7 +297,7 @@ public class PEMManager {
      */
     @Nullable
     public String getPublicKeyFingerprint() throws IOException {
-        PublicKey key = getPublicKey();
+        PublicKey key = toPublicKey();
         if (key == null) {
             return null;
         }
@@ -313,7 +313,11 @@ public class PEMManager {
      */
     @Nonnull
     public static byte[] getKeyDigestSHA1(@Nonnull Key k) throws IOException {
-        return getKeyDigest(k, "SHA1");
+        try {
+            return getKeyDigest(k, "SHA1");
+        } catch (NoSuchAlgorithmException e) {
+           throw new AssertionError("SHA1 algorithm not found to create digest");
+        }
     }
 
     /**
@@ -325,7 +329,11 @@ public class PEMManager {
      */
     @Nonnull
     public static byte[] getKeyDigestMD5(@Nonnull Key k) throws IOException {
-        return getKeyDigest(k, "MD5");
+        try {
+            return getKeyDigest(k, "MD5");
+        } catch (NoSuchAlgorithmException e) {
+            throw new AssertionError("SHA1 algorithm not found to create digest");
+        }
     }
 
     /**
@@ -333,26 +341,23 @@ public class PEMManager {
      * the JVM API.
      * 
      * @param k key to generate the digest from
-     * @param dg digest format
+     * @param algorithm digest format
      * @return the generated digest
      * @throws IOException if a problem exists creating the digest
+     * @throws NoSuchAlgorithmException when provided digest algorithm is not available
      */
     @Nonnull
-    public static byte[] getKeyDigest(@Nonnull Key k, @Nonnull String dg) throws IOException {
-        try {
-            MessageDigest md5 = MessageDigest.getInstance(dg);
+    public static byte[] getKeyDigest(@Nonnull Key k, @Nonnull String algorithm) throws IOException, NoSuchAlgorithmException {
+        MessageDigest md5 = MessageDigest.getInstance(algorithm);
 
-            DigestInputStream in = new DigestInputStream(new ByteArrayInputStream(k.getEncoded()), md5);
-            try {
-                while (in.read(new byte[128]) > 0)
-                    ; // simply discard the input
-            } finally {
-                in.close();
-            }
-            return md5.digest();
-        } catch (NoSuchAlgorithmException e) {
-            throw new AssertionError(e);
+        DigestInputStream in = new DigestInputStream(new ByteArrayInputStream(k.getEncoded()), md5);
+        try {
+            while (in.read(new byte[128]) > 0)
+                ; // simply discard the input
+        } finally {
+            in.close();
         }
+        return md5.digest();
     }
 
     /**
@@ -361,7 +366,8 @@ public class PEMManager {
      * @param data to be encoded
      * @return hex formated string "ab:cd:ef:...:12"
      */
-    public static String hexEncode(byte[] data) {
+    @Nonnull
+    public static String hexEncode(@Nonnull byte[] data) {
         char[] hex = Hex.encodeHex(data);
         StringBuilder buf = new StringBuilder();
         for (int i = 0; i < hex.length; i += 2) {

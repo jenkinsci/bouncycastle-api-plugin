@@ -29,6 +29,7 @@ import static org.junit.Assert.assertEquals;
 import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
+import java.security.NoSuchAlgorithmException;
 import java.security.Security;
 
 import org.junit.BeforeClass;
@@ -54,7 +55,7 @@ public class FingerPrintTest {
         PEMManager pemCodec = new PEMManager(PEM_FILE);
         assertEquals(PRIVATE_KEY_FP, pemCodec.getPrivateKeyFingerprint());
 
-        PEMManager pemCodecOnlyPublic = new PEMManager(pemCodec.getPublicKey());
+        PEMManager pemCodecOnlyPublic = new PEMManager(pemCodec.toPublicKey());
         assertEquals(PUBLIC_KEY_FP, pemCodecOnlyPublic.getPublicKeyFingerprint());
         assertEquals(null, pemCodecOnlyPublic.getPrivateKeyFingerprint());
     }
@@ -64,14 +65,14 @@ public class FingerPrintTest {
         PEMManager pemCodec = new PEMManager(PEM_FILE);
         assertEquals(PUBLIC_KEY_FP, pemCodec.getPublicKeyFingerprint());
 
-        PEMManager pemCodecOnlyPrivate = new PEMManager(pemCodec.getPrivateKey());
+        PEMManager pemCodecOnlyPrivate = new PEMManager(pemCodec.toPrivateKey());
         assertEquals(PRIVATE_KEY_FP, pemCodecOnlyPrivate.getPrivateKeyFingerprint());
         assertEquals(null, pemCodecOnlyPrivate.getPublicKeyFingerprint());
     }
 
-    @Test(expected = AssertionError.class)
-    public void testUnsuportedCodec() throws IOException {
+    @Test(expected = NoSuchAlgorithmException.class)
+    public void testUnsuportedCodec() throws IOException, NoSuchAlgorithmException {
         PEMManager pemCodec = new PEMManager(PEM_FILE);
-        PEMManager.getKeyDigest(pemCodec.getPrivateKey(), "XYZ");
+        PEMManager.getKeyDigest(pemCodec.toPrivateKey(), "XYZ");
     }
 }
