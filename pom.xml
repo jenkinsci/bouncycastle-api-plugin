@@ -33,7 +33,7 @@
   </parent>
 
   <artifactId>bouncycastle-api</artifactId>
-  <version>0.1-SNAPSHOT</version>
+  <version>1.0</version>
   <packaging>hpi</packaging>
 
   <name>bouncycastle API Plugin</name>
@@ -61,7 +61,7 @@
     <connection>scm:git:git://github.com/jenkinsci/bouncycastle-api.git</connection>
     <developerConnection>scm:git:git@github.com:jenkinsci/bouncycastle-api.git</developerConnection>
     <url>http://github.com/jenkinsci/bouncycastle-api</url>
-    <tag>HEAD</tag>
+    <tag>bouncycastle-api-1.0</tag>
   </scm>
 
   <properties>
