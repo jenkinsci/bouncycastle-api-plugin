@@ -36,7 +36,7 @@ import java.security.UnrecoverableKeyException;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-import jenkins.bouncycastle.api.PEMManager;
+import jenkins.bouncycastle.api.PEMEncodable;
 
 public class FingerPrintTest {
 
@@ -53,27 +53,27 @@ public class FingerPrintTest {
 
     @Test
     public void testPrivateFingerprint() throws IOException, UnrecoverableKeyException {
-        PEMManager pemCodec = new PEMManager(PEM_FILE);
+        PEMEncodable pemCodec = PEMEncodable.read(PEM_FILE);
         assertEquals(PRIVATE_KEY_FP, pemCodec.getPrivateKeyFingerprint());
 
-        PEMManager pemCodecOnlyPublic = new PEMManager(pemCodec.toPublicKey());
+        PEMEncodable pemCodecOnlyPublic = PEMEncodable.create(pemCodec.toPublicKey());
         assertEquals(PUBLIC_KEY_FP, pemCodecOnlyPublic.getPublicKeyFingerprint());
         assertEquals(null, pemCodecOnlyPublic.getPrivateKeyFingerprint());
     }
 
     @Test
     public void testPublicFingerprint() throws IOException, UnrecoverableKeyException {
-        PEMManager pemCodec = new PEMManager(PEM_FILE);
+        PEMEncodable pemCodec = PEMEncodable.read(PEM_FILE);
         assertEquals(PUBLIC_KEY_FP, pemCodec.getPublicKeyFingerprint());
 
-        PEMManager pemCodecOnlyPrivate = new PEMManager(pemCodec.toPrivateKey());
+        PEMEncodable pemCodecOnlyPrivate = PEMEncodable.create(pemCodec.toPrivateKey());
         assertEquals(PRIVATE_KEY_FP, pemCodecOnlyPrivate.getPrivateKeyFingerprint());
         assertEquals(null, pemCodecOnlyPrivate.getPublicKeyFingerprint());
     }
 
     @Test(expected = NoSuchAlgorithmException.class)
     public void testUnsuportedCodec() throws IOException, NoSuchAlgorithmException, UnrecoverableKeyException {
-        PEMManager pemCodec = new PEMManager(PEM_FILE);
-        PEMManager.getKeyDigest(pemCodec.toPrivateKey(), "XYZ");
+        PEMEncodable pemCodec = PEMEncodable.read(PEM_FILE);
+        PEMEncodable.getKeyDigest(pemCodec.toPrivateKey(), "XYZ");
     }
 }

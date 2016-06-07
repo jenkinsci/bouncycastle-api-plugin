@@ -28,17 +28,19 @@ import static org.junit.Assert.assertEquals;
 
 import java.io.File;
 import java.net.URISyntaxException;
+import java.nio.charset.StandardCharsets;
 import java.security.PrivateKey;
 import java.security.Security;
 import java.util.Arrays;
 
 import org.apache.commons.io.FileUtils;
+import org.bouncycastle.util.encoders.Base64;
 import org.junit.BeforeClass;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
 
-import jenkins.bouncycastle.api.PEMManager;
+import jenkins.bouncycastle.api.PEMEncodable;
 
 public class EncodignDecodingTest {
 
@@ -68,32 +70,38 @@ public class EncodignDecodingTest {
 
     @Test
     public void testReadPrivateKeyPEM() throws Exception {
-        PEMManager pemManager = new PEMManager(new File(PRIVATE_KEY_PEM.toURI()));
+        PEMEncodable pemManager = PEMEncodable.read(new File(PRIVATE_KEY_PEM.toURI()));
 
-        assertEquals(PEMManager.encodeBase64(pemManager.toKeyPair().getPrivate().getEncoded()),
-                PEMManager.encodeBase64(pemManager.toPrivateKey().getEncoded()));
-        assertEquals(PUBLIC_KEY, PEMManager.encodeBase64(pemManager.toKeyPair().getPublic().getEncoded()));
-        assertEquals(PUBLIC_KEY, PEMManager.encodeBase64(pemManager.toPublicKey().getEncoded()));
+        assertEquals(
+                new String(Base64.encode(pemManager.toKeyPair().getPrivate().getEncoded()), StandardCharsets.UTF_8),
+                new String(Base64.encode(pemManager.toPrivateKey().getEncoded()), StandardCharsets.UTF_8));
+        assertEquals(PUBLIC_KEY,
+                new String(Base64.encode(pemManager.toKeyPair().getPublic().getEncoded()), StandardCharsets.UTF_8));
+        assertEquals(PUBLIC_KEY,
+                new String(Base64.encode(pemManager.toPublicKey().getEncoded()), StandardCharsets.UTF_8));
     }
 
     @Test
     public void testReadPrivateKeyWithPasswordPEM() throws Exception {
-        PEMManager pemManager = new PEMManager(new File(PRIVATE_KEY_PW_PEM.toURI()), PRIVATE_KEY_PW);
+        PEMEncodable pemManager = PEMEncodable.read(new File(PRIVATE_KEY_PW_PEM.toURI()), PRIVATE_KEY_PW);
 
-        assertEquals(PEMManager.encodeBase64(pemManager.toKeyPair().getPrivate().getEncoded()),
-                PEMManager.encodeBase64(pemManager.toPrivateKey().getEncoded()));
-        assertEquals(PUBLIC_KEY, PEMManager.encodeBase64(pemManager.toKeyPair().getPublic().getEncoded()));
-        assertEquals(PUBLIC_KEY, PEMManager.encodeBase64(pemManager.toPublicKey().getEncoded()));
+        assertEquals(
+                new String(Base64.encode(pemManager.toKeyPair().getPrivate().getEncoded()), StandardCharsets.UTF_8),
+                new String(Base64.encode(pemManager.toPrivateKey().getEncoded()), StandardCharsets.UTF_8));
+        assertEquals(PUBLIC_KEY,
+                new String(Base64.encode(pemManager.toKeyPair().getPublic().getEncoded()), StandardCharsets.UTF_8));
+        assertEquals(PUBLIC_KEY,
+                new String(Base64.encode(pemManager.toPublicKey().getEncoded()), StandardCharsets.UTF_8));
     }
 
     @Test
     public void testReadOnlyPrivateKeyPEM() throws Exception {
         File onlyPrivate = folder.newFile("from-private.prm");
 
-        PEMManager pemManager = new PEMManager(PRIVATE_KEY_PEM);
-        PEMManager pemManagerOnlyPrivate = new PEMManager(pemManager.toPrivateKey());
+        PEMEncodable pemManager = PEMEncodable.read(PRIVATE_KEY_PEM);
+        PEMEncodable pemManagerOnlyPrivate = PEMEncodable.create(pemManager.toPrivateKey());
 
-        pemManagerOnlyPrivate.encode(onlyPrivate);
+        pemManagerOnlyPrivate.write(onlyPrivate);
         assertEquals(true, Arrays.equals(pemManagerOnlyPrivate.toPrivateKey().getEncoded(),
                 pemManager.toPrivateKey().getEncoded()));
         assertEquals(FileUtils.readFileToString(PRIVATE_KEY_PEM), FileUtils.readFileToString(onlyPrivate));
@@ -101,14 +109,15 @@ public class EncodignDecodingTest {
 
     @Test
     public void testReadPublicKeyPEM() throws Exception {
-        PEMManager pemManager = new PEMManager(PUBLIC_KEY_PEM);
+        PEMEncodable pemManager = PEMEncodable.read(PUBLIC_KEY_PEM);
 
-        assertEquals(PUBLIC_KEY, PEMManager.encodeBase64(pemManager.toPublicKey().getEncoded()));
+        assertEquals(PUBLIC_KEY,
+                new String(Base64.encode(pemManager.toPublicKey().getEncoded()), StandardCharsets.UTF_8));
     }
 
     @Test
     public void testReadInexistentFromPublicKey() throws Exception {
-        PEMManager pemManager = new PEMManager(PUBLIC_KEY_PEM);
+        PEMEncodable pemManager = PEMEncodable.read(PUBLIC_KEY_PEM);
         assertEquals(null, pemManager.toPrivateKey());
         assertEquals(null, pemManager.toKeyPair());
         assertEquals(null, pemManager.toCertificate());
@@ -116,9 +125,9 @@ public class EncodignDecodingTest {
 
     @Test
     public void testReadInexistentFromPrivateKey() throws Exception {
-        PEMManager pemManager = new PEMManager(PRIVATE_KEY_PEM);
+        PEMEncodable pemManager = PEMEncodable.read(PRIVATE_KEY_PEM);
 
-        PEMManager pemManagerOnlyPrivate = new PEMManager(pemManager.toKeyPair().getPrivate());
+        PEMEncodable pemManagerOnlyPrivate = PEMEncodable.create(pemManager.toKeyPair().getPrivate());
 
         assertEquals(null, pemManagerOnlyPrivate.toPublicKey());
         assertEquals(null, pemManagerOnlyPrivate.toKeyPair());
@@ -130,8 +139,8 @@ public class EncodignDecodingTest {
     public void testWritePublicKeyPEM() throws Exception {
         File pemFileNew = folder.newFile("public-key-test.pem");
 
-        PEMManager pemManager = new PEMManager(PUBLIC_KEY_PEM);
-        pemManager.encode(pemFileNew);
+        PEMEncodable pemManager = PEMEncodable.read(PUBLIC_KEY_PEM);
+        pemManager.write(pemFileNew);
 
         assertEquals(FileUtils.readFileToString(PUBLIC_KEY_PEM), FileUtils.readFileToString(pemFileNew));
     }
@@ -140,8 +149,8 @@ public class EncodignDecodingTest {
     public void testWritePrivateKeyPEM() throws Exception {
         File pemFileNew = folder.newFile("private-key-test.pem");
 
-        PEMManager pemManager = new PEMManager(PRIVATE_KEY_PEM);
-        pemManager.encode(pemFileNew);
+        PEMEncodable pemManager = PEMEncodable.read(PRIVATE_KEY_PEM);
+        pemManager.write(pemFileNew);
 
         assertEquals(FileUtils.readFileToString(PRIVATE_KEY_PEM), FileUtils.readFileToString(pemFileNew));
     }
@@ -150,8 +159,8 @@ public class EncodignDecodingTest {
     public void testCreationFromObjectPublicKeyPEM() throws Exception {
         File pemFileNew = folder.newFile("public-key-test.pem");
 
-        PEMManager pemManager = new PEMManager(PUBLIC_KEY_PEM);
-        new PEMManager(pemManager.toPublicKey()).encode(pemFileNew);
+        PEMEncodable pemManager = PEMEncodable.read(PUBLIC_KEY_PEM);
+        PEMEncodable.create(pemManager.toPublicKey()).write(pemFileNew);
 
         assertEquals(FileUtils.readFileToString(PUBLIC_KEY_PEM), FileUtils.readFileToString(pemFileNew));
     }
@@ -160,20 +169,9 @@ public class EncodignDecodingTest {
     public void testCreationFromObjectPrivateKeyPEM() throws Exception {
         File pemFileNew = folder.newFile("private-key-test.pem");
 
-        PEMManager pemManager = new PEMManager(PRIVATE_KEY_PEM);
-        new PEMManager(pemManager.toKeyPair()).encode(pemFileNew);
+        PEMEncodable pemManager = PEMEncodable.read(PRIVATE_KEY_PEM);
+        PEMEncodable.create(pemManager.toKeyPair()).write(pemFileNew);
 
         assertEquals(FileUtils.readFileToString(PRIVATE_KEY_PEM), FileUtils.readFileToString(pemFileNew));
-    }
-
-    @Test
-    public void testBase64() throws Exception {
-        PEMManager pemManager = new PEMManager(PRIVATE_KEY_PEM);
-
-        PrivateKey privateKey = pemManager.toKeyPair().getPrivate();
-        String encodedPrivateKey = PEMManager.encodeBase64(privateKey.getEncoded());
-
-        assertEquals(true, Arrays.equals(pemManager.toKeyPair().getPrivate().getEncoded(),
-                PEMManager.decodeBase64(encodedPrivateKey)));
     }
 }

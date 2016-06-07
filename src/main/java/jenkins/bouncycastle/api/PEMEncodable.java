@@ -56,75 +56,76 @@ import org.bouncycastle.util.encoders.Base64;
  *
  * @since 1.0
  */
-public class PEMManager {
+public final class PEMEncodable {
 
     /**
      * Stores the internal Bouncy Castle or JCA object
      */
+    @Nonnull
     private Object object;
 
-    /**
-     * Creates a {@link PEMManager} by reading a PEM file
-     * 
-     * @param pemFile {@link File} pointing to the PEM file to read
-     * @throws IOException launched if a problem exists reading the PEM information or the {@link File}
-     * @throws UnrecoverableKeyException in case PEM is passphrase protected and none or wrong is provided 
-     */
-    public PEMManager(@Nonnull File pemFile) throws IOException, UnrecoverableKeyException {
-        decode(pemFile, null);
-    }
-
-    /**
-     * Creates a {@link PEMManager} by reading a PEM file
-     * 
-     * @param pemFile {@link File} pointing to the PEM file to read
-     * @param passphrase passphrase for the encrypted PEM data. null if PEM data is not passphrase protected
-     * @throws IOException launched if a problem exists reading the PEM information or the {@link File}
-     * @throws UnrecoverableKeyException in case PEM is passphrase protected and none or wrong is provided 
-     */
-    public PEMManager(@Nonnull File pemFile, @Nullable String passphrase) throws IOException, UnrecoverableKeyException {
-        decode(pemFile, passphrase);
-    }
-
-    /**
-     * Creates a {@link PEMManager} by reading PEM formated data from a {@link String}
-     * 
-     * @param pem {@link String} with the PEM data
-     * @throws IOException launched if a problem exists reading the PEM information
-     * @throws UnrecoverableKeyException in case PEM is passphrase protected and none or wrong is provided 
-     */
-    public PEMManager(@Nonnull String pem) throws IOException, UnrecoverableKeyException {
-        decode(pem, null);
-    }
-
-    /**
-     * Creates a {@link PEMManager} by reading PEM formated data from a {@link String}
-     * 
-     * @param pem {@link String} with the PEM data
-     * @param passphrase passphrase for the encrypted PEM data. null if PEM data is not passphrase protected
-     * @throws IOException launched if a problem exists reading the PEM information
-     * @throws UnrecoverableKeyException in case PEM is passphrase protected and none or wrong is provided
-     */
-    public PEMManager(@Nonnull String pem, @Nullable String passphrase) throws IOException, UnrecoverableKeyException {
-        decode(pem, passphrase);
-    }
-
-    /**
-     *
-     * Creates a {@link PEMManager} from an {@link Object} that can be of any supported type by Bouncy Castle or JCA:
-     * {@link Key}, {@link PrivateKey}, {@link KeyPair}, {@link Certificate}, etc.
-     *
-     * @param pemObject object to manage
-     */
-    public PEMManager(@Nonnull Object pemObject) {
+    private PEMEncodable(@Nonnull Object pemObject) {
         this.object = pemObject;
     }
 
-    private void decode(@Nonnull File pemFile, @Nullable String passphrase) throws IOException, UnrecoverableKeyException {
-        decode(FileUtils.readFileToString(pemFile), passphrase);
+    /**
+     * Creates a {@link PEMEncodable} from a {@link Key} object
+     * 
+     * @param key {@link Key} object with the key
+     * @return {@link PEMEncodable} object
+     */
+    @Nonnull
+    public static PEMEncodable create(@Nonnull Key key) {
+        return new PEMEncodable(key);
     }
 
-    private void decode(@Nonnull String pem, @Nullable final String passphrase) throws IOException, UnrecoverableKeyException {
+    /**
+     * Creates a {@link PEMEncodable} from a {@link KeyPair} object
+     * 
+     * @param keyPair {@link KeyPair} object with the key pair
+     * @return {@link PEMEncodable} object
+     */
+    @Nonnull
+    public static PEMEncodable create(@Nonnull KeyPair keyPair) {
+        return new PEMEncodable(keyPair);
+    }
+
+    /**
+     * Creates a {@link PEMEncodable} from a {@link Certificate} object
+     * 
+     * @param certificate {@link Certificate} object with the certificate
+     * @return {@link PEMEncodable} object
+     */
+    @Nonnull
+    public static PEMEncodable create(@Nonnull Certificate certificate) {
+        return new PEMEncodable(certificate);
+    }
+
+    /**
+     * Creates a {@link PEMEncodable} by decoding PEM formated data from a {@link String}
+     * 
+     * @param pem {@link String} with the PEM data
+     * @return {@link PEMEncodable} object
+     * @throws IOException launched if a problem exists reading the PEM information
+     * @throws UnrecoverableKeyException in case PEM is passphrase protected and none or wrong is provided
+     */
+    @Nonnull
+    public static PEMEncodable decode(@Nonnull String pem) throws IOException, UnrecoverableKeyException {
+        return decode(pem, null);
+    }
+
+    /**
+     * Creates a {@link PEMEncodable} by decoding PEM formated data from a {@link String}
+     * 
+     * @param pem {@link String} with the PEM data
+     * @param passphrase passphrase for the encrypted PEM data. null if PEM data is not passphrase protected
+     * @return {@link PEMEncodable} object
+     * @throws IOException launched if a problem exists reading the PEM information
+     * @throws UnrecoverableKeyException in case PEM is passphrase protected and none or wrong is provided
+     */
+    @Nonnull
+    public static PEMEncodable decode(@Nonnull String pem, @Nullable final String passphrase)
+            throws IOException, UnrecoverableKeyException {
         PasswordFinder pwf = null;
         if (passphrase != null) {
             pwf = new PasswordFinder() {
@@ -137,7 +138,7 @@ public class PEMManager {
 
         PEMReader parser = new PEMReader(new StringReader(pem), pwf);
         try {
-            object = parser.readObject();
+            return new PEMEncodable(parser.readObject());
         } catch (PasswordException pwE) {
             throw new UnrecoverableKeyException();
         } finally {
@@ -164,20 +165,46 @@ public class PEMManager {
     }
 
     /**
-     * Encodes the current stored information in PEM formated {@link File}
+     * Creates a {@link PEMEncodable} by reading a PEM file
+     * 
+     * @param pemFile {@link File} pointing to the PEM file to read
+     * @throws IOException launched if a problem exists reading the PEM information or the {@link File}
+     * @throws UnrecoverableKeyException in case PEM is passphrase protected and none or wrong is provided
+     */
+    @Nonnull
+    public static PEMEncodable read(@Nonnull File pemFile) throws IOException, UnrecoverableKeyException {
+        return read(pemFile, null);
+    }
+
+    /**
+     * Creates a {@link PEMEncodable} by reading a PEM file
+     * 
+     * @param pemFile {@link File} pointing to the PEM file to read
+     * @param passphrase passphrase for the encrypted PEM data. null if PEM data is not passphrase protected
+     * @throws IOException launched if a problem exists reading the PEM information or the {@link File}
+     * @throws UnrecoverableKeyException in case PEM is passphrase protected and none or wrong is provided
+     */
+    @Nonnull
+    public static PEMEncodable read(@Nonnull File pemFile, @Nullable String passphrase)
+            throws IOException, UnrecoverableKeyException {
+        return decode(FileUtils.readFileToString(pemFile), passphrase);
+    }
+
+    /**
+     * Writes the current stored information in PEM formated {@link File}
      * 
      * @param pemFile PEM {@link File} to read
      * 
      * @throws IOException launched if a problem exists generating the PEM information or writing the {@link File}
      */
-    public void encode(@Nonnull File pemFile) throws IOException {
+    public void write(@Nonnull File pemFile) throws IOException {
         FileUtils.writeStringToFile(pemFile, encode());
     }
 
     /**
-     * Obtain {@link KeyPair} object with the public and private key from the read PEM. No conversion is performed, the
-     * read PEM must contain private and public key in order to obtain a {@link KeyPair} object, null will be returned
-     * in all the other cases.
+     * Obtain {@link KeyPair} object with the public and private key from the decoded PEM. No conversion is performed,
+     * the read PEM must contain private and public key in order to obtain a {@link KeyPair} object, null will be
+     * returned in all the other cases.
      * 
      * @return {@link KeyPair} object with public and private keys or null if the read PEM didn't contain private and
      * public keys.
@@ -241,7 +268,7 @@ public class PEMManager {
 
     /**
      * Obtains raw JCA or BouncyCastle {@link Object} from the read PEM. Depending on the PEM nature or the object
-     * passed to the {@link #PEMManager(Object pemObject)}, the returned object can be one of the following (not
+     * passed to the {@link #PEMEncodable(Object pemObject)}, the returned object can be one of the following (not
      * exhaustive list) and any classes that inherit from them:
      * <ul>
      * <li><strong>JCA</strong>
@@ -314,7 +341,8 @@ public class PEMManager {
         try {
             return getKeyDigest(k, "SHA1");
         } catch (NoSuchAlgorithmException e) {
-            throw new AssertionError("SHA1 algorithm support is mandated by Java Language Specification. See https://docs.oracle.com/javase/7/docs/api/java/security/MessageDigest.html");
+            throw new AssertionError(
+                    "SHA1 algorithm support is mandated by Java Language Specification. See https://docs.oracle.com/javase/7/docs/api/java/security/MessageDigest.html");
         }
     }
 
@@ -329,7 +357,8 @@ public class PEMManager {
         try {
             return getKeyDigest(k, "MD5");
         } catch (NoSuchAlgorithmException e) {
-            throw new AssertionError("MD5 algorithm support is mandated by Java Language Specification. See https://docs.oracle.com/javase/7/docs/api/java/security/MessageDigest.html");
+            throw new AssertionError(
+                    "MD5 algorithm support is mandated by Java Language Specification. See https://docs.oracle.com/javase/7/docs/api/java/security/MessageDigest.html");
         }
     }
 
@@ -356,7 +385,7 @@ public class PEMManager {
      * @return hex formated string "ab:cd:ef:...:12"
      */
     @Nonnull
-    public static String hexEncode(@Nonnull byte[] data) {
+    private static String hexEncode(@Nonnull byte[] data) {
         char[] hex = Hex.encodeHex(data);
         StringBuilder buf = new StringBuilder(hex.length + Math.max(0, hex.length / 2 - 1));
         for (int i = 0; i < hex.length; i += 2) {
@@ -375,7 +404,7 @@ public class PEMManager {
      * @return base 64 formatted string
      */
     @Nonnull
-    public static String encodeBase64(@Nonnull byte[] data) {
+    private static String encodeBase64(@Nonnull byte[] data) {
         return new String(Base64.encode(data), StandardCharsets.UTF_8);
     }
 
@@ -386,7 +415,7 @@ public class PEMManager {
      * @return decoded data
      */
     @Nonnull
-    public static byte[] decodeBase64(@Nonnull String data) {
+    private static byte[] decodeBase64(@Nonnull String data) {
         return Base64.decode(data);
     }
 }
