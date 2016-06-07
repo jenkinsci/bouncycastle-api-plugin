@@ -29,6 +29,8 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
+import org.kohsuke.accmod.Restricted;
+import org.kohsuke.accmod.restrictions.NoExternalUse;
 
 import hudson.Plugin;
 import hudson.init.InitMilestone;
@@ -47,6 +49,7 @@ public class SecurityProviderInitializer extends Plugin {
      * 
      */
     @Initializer(before = InitMilestone.PLUGINS_STARTED)
+    @Restricted(NoExternalUse.class)
     public static void addSecurityProvider() {
         LOGGER.log(Level.INFO, "Initializing Bouncy Castle security provider.");
         Security.addProvider(new BouncyCastleProvider());
