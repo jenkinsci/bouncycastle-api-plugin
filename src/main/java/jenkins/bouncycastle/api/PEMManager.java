@@ -367,9 +367,9 @@ public class PEMManager {
     @Nonnull
     public static String hexEncode(@Nonnull byte[] data) {
         char[] hex = Hex.encodeHex(data);
-        StringBuilder buf = new StringBuilder();
+        StringBuilder buf = new StringBuilder(hex.length + Math.max(0, hex.length / 2 - 1));
         for (int i = 0; i < hex.length; i += 2) {
-            if (buf.length() > 0) {
+            if (i > 0) {
                 buf.append(':');
             }
             buf.append(hex, i, 2);
