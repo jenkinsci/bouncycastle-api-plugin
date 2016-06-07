@@ -93,7 +93,7 @@ public class EncodignDecodingTest {
         PEMManager pemManager = new PEMManager(PRIVATE_KEY_PEM);
         PEMManager pemManagerOnlyPrivate = new PEMManager(pemManager.toPrivateKey());
 
-        pemManagerOnlyPrivate.encodePEM(onlyPrivate);
+        pemManagerOnlyPrivate.encode(onlyPrivate);
         assertEquals(true, Arrays.equals(pemManagerOnlyPrivate.toPrivateKey().getEncoded(),
                 pemManager.toPrivateKey().getEncoded()));
         assertEquals(FileUtils.readFileToString(PRIVATE_KEY_PEM), FileUtils.readFileToString(onlyPrivate));
@@ -131,7 +131,7 @@ public class EncodignDecodingTest {
         File pemFileNew = folder.newFile("public-key-test.pem");
 
         PEMManager pemManager = new PEMManager(PUBLIC_KEY_PEM);
-        pemManager.encodePEM(pemFileNew);
+        pemManager.encode(pemFileNew);
 
         assertEquals(FileUtils.readFileToString(PUBLIC_KEY_PEM), FileUtils.readFileToString(pemFileNew));
     }
@@ -141,7 +141,7 @@ public class EncodignDecodingTest {
         File pemFileNew = folder.newFile("private-key-test.pem");
 
         PEMManager pemManager = new PEMManager(PRIVATE_KEY_PEM);
-        pemManager.encodePEM(pemFileNew);
+        pemManager.encode(pemFileNew);
 
         assertEquals(FileUtils.readFileToString(PRIVATE_KEY_PEM), FileUtils.readFileToString(pemFileNew));
     }
@@ -151,7 +151,7 @@ public class EncodignDecodingTest {
         File pemFileNew = folder.newFile("public-key-test.pem");
 
         PEMManager pemManager = new PEMManager(PUBLIC_KEY_PEM);
-        new PEMManager(pemManager.toPublicKey()).encodePEM(pemFileNew);
+        new PEMManager(pemManager.toPublicKey()).encode(pemFileNew);
 
         assertEquals(FileUtils.readFileToString(PUBLIC_KEY_PEM), FileUtils.readFileToString(pemFileNew));
     }
@@ -161,7 +161,7 @@ public class EncodignDecodingTest {
         File pemFileNew = folder.newFile("private-key-test.pem");
 
         PEMManager pemManager = new PEMManager(PRIVATE_KEY_PEM);
-        new PEMManager(pemManager.toKeyPair()).encodePEM(pemFileNew);
+        new PEMManager(pemManager.toKeyPair()).encode(pemFileNew);
 
         assertEquals(FileUtils.readFileToString(PRIVATE_KEY_PEM), FileUtils.readFileToString(pemFileNew));
     }
