@@ -309,16 +309,13 @@ public class PEMManager {
      * 
      * @param k the key to generate the digest from
      * @return the generated digest
-     * @throws IOException if a problem exists creating the digest
-     * @see <a href="https://docs.oracle.com/javase/7/docs/api/java/security/MessageDigest.html"> JDK Digest
-     * Algorithms</a>
      */
     @Nonnull
     public static byte[] getKeyDigestSHA1(@Nonnull Key k) {
         try {
             return getKeyDigest(k, "SHA1");
         } catch (NoSuchAlgorithmException e) {
-            throw new AssertionError("SHA1 algorithm not found to create digest");
+            throw new AssertionError("SHA1 algorithm support is mandated by Java Language Specification. See https://docs.oracle.com/javase/7/docs/api/java/security/MessageDigest.html");
         }
     }
 
@@ -327,16 +324,13 @@ public class PEMManager {
      * 
      * @param k the key to generate the digest from
      * @return the generated digest
-     * @throws IOException if a problem exists creating the digest
-     * @see <a href="https://docs.oracle.com/javase/7/docs/api/java/security/MessageDigest.html"> JDK Digest
-     * Algorithms</a>
      */
     @Nonnull
     public static byte[] getKeyDigestMD5(@Nonnull Key k) {
         try {
             return getKeyDigest(k, "MD5");
         } catch (NoSuchAlgorithmException e) {
-            throw new AssertionError("MD5 algorithm not found to create digest");
+            throw new AssertionError("MD5 algorithm support is mandated by Java Language Specification. See https://docs.oracle.com/javase/7/docs/api/java/security/MessageDigest.html");
         }
     }
 
@@ -347,7 +341,6 @@ public class PEMManager {
      * @param k key to generate the digest from
      * @param algorithm digest format
      * @return the generated digest
-     * @throws IOException if a problem exists creating the digest
      * @throws NoSuchAlgorithmException when provided digest algorithm is not available
      */
     @Nonnull
