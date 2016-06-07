@@ -58,9 +58,9 @@
   </developers>
 
   <scm>
-    <connection>scm:git:git://github.com/jenkinsci/bouncycastle-api.git</connection>
-    <developerConnection>scm:git:git@github.com:jenkinsci/bouncycastle-api.git</developerConnection>
-    <url>http://github.com/jenkinsci/bouncycastle-api</url>
+    <connection>scm:git:git://github.com/jenkinsci/bouncycastle-api-plugin.git</connection>
+    <developerConnection>scm:git:git@github.com:jenkinsci/bouncycastle-api-plugin.git</developerConnection>
+    <url>https://github.com/jenkinsci/bouncycastle-api-plugin</url>
     <tag>HEAD</tag>
   </scm>
 
@@ -89,9 +89,6 @@
       <version>1.47</version>
       <scope>provided</scope>
     </dependency>
-    <!-- plugin dependencies -->
-    <!-- jenkins dependencies -->
-    <!-- test dependencies -->
   </dependencies>
 
 </project>
