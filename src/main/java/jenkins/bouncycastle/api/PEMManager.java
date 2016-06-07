@@ -35,6 +35,7 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
 import java.security.PublicKey;
+import java.security.UnrecoverableKeyException;
 import java.security.cert.Certificate;
 
 import javax.annotation.CheckForNull;
@@ -67,9 +68,9 @@ public class PEMManager {
      * 
      * @param pemFile {@link File} pointing to the PEM file to read
      * @throws IOException launched if a problem exists reading the PEM information or the {@link File}
-     * @throws BCPasswordException in case PEM is passphrase protected and none or wrong is provided
+     * @throws UnrecoverableKeyException in case PEM is passphrase protected and none or wrong is provided 
      */
-    public PEMManager(@Nonnull File pemFile) throws IOException {
+    public PEMManager(@Nonnull File pemFile) throws IOException, UnrecoverableKeyException {
         decode(pemFile, null);
     }
 
@@ -79,9 +80,9 @@ public class PEMManager {
      * @param pemFile {@link File} pointing to the PEM file to read
      * @param passphrase passphrase for the encrypted PEM data. null if PEM data is not passphrase protected
      * @throws IOException launched if a problem exists reading the PEM information or the {@link File}
-     * @throws BCPasswordException in case PEM is passphrase protected and none or wrong is provided
+     * @throws UnrecoverableKeyException in case PEM is passphrase protected and none or wrong is provided 
      */
-    public PEMManager(@Nonnull File pemFile, @Nullable String passphrase) throws IOException {
+    public PEMManager(@Nonnull File pemFile, @Nullable String passphrase) throws IOException, UnrecoverableKeyException {
         decode(pemFile, passphrase);
     }
 
@@ -90,9 +91,9 @@ public class PEMManager {
      * 
      * @param pem {@link String} with the PEM data
      * @throws IOException launched if a problem exists reading the PEM information
-     * @throws BCPasswordException in case PEM is passphrase protected and none or wrong is provided
+     * @throws UnrecoverableKeyException in case PEM is passphrase protected and none or wrong is provided 
      */
-    public PEMManager(@Nonnull String pem) throws IOException {
+    public PEMManager(@Nonnull String pem) throws IOException, UnrecoverableKeyException {
         decode(pem, null);
     }
 
@@ -102,9 +103,9 @@ public class PEMManager {
      * @param pem {@link String} with the PEM data
      * @param passphrase passphrase for the encrypted PEM data. null if PEM data is not passphrase protected
      * @throws IOException launched if a problem exists reading the PEM information
-     * @throws BCPasswordException in case PEM is passphrase protected and none or wrong is provided
+     * @throws UnrecoverableKeyException in case PEM is passphrase protected and none or wrong is provided
      */
-    public PEMManager(@Nonnull String pem, @Nullable String passphrase) throws IOException {
+    public PEMManager(@Nonnull String pem, @Nullable String passphrase) throws IOException, UnrecoverableKeyException {
         decode(pem, passphrase);
     }
 
@@ -119,11 +120,11 @@ public class PEMManager {
         this.object = pemObject;
     }
 
-    private void decode(@Nonnull File pemFile, @Nullable String passphrase) throws IOException {
+    private void decode(@Nonnull File pemFile, @Nullable String passphrase) throws IOException, UnrecoverableKeyException {
         decode(FileUtils.readFileToString(pemFile), passphrase);
     }
 
-    private void decode(@Nonnull String pem, @Nullable final String passphrase) throws IOException {
+    private void decode(@Nonnull String pem, @Nullable final String passphrase) throws IOException, UnrecoverableKeyException {
         PasswordFinder pwf = null;
         if (passphrase != null) {
             pwf = new PasswordFinder() {
@@ -138,7 +139,7 @@ public class PEMManager {
         try {
             object = parser.readObject();
         } catch (PasswordException pwE) {
-            throw new BCPasswordException(pwE);
+            throw new UnrecoverableKeyException();
         } finally {
             parser.close();
         }
@@ -276,10 +277,9 @@ public class PEMManager {
      * 
      * @return private key fingerprint in hex format "ab:cd:ef:...:12", null if the private key could not be obtained
      * from the current PEM data.
-     * @throws IOException thrown if a problem exists creating the fingerprint
      */
     @CheckForNull
-    public String getPrivateKeyFingerprint() throws IOException {
+    public String getPrivateKeyFingerprint() {
         PrivateKey key = toPrivateKey();
         if (key == null) {
             return null;
@@ -293,10 +293,9 @@ public class PEMManager {
      * 
      * @return public key fingerprint in hex format "ab:cd:ef:...:12", null if the public key could not be obtained from
      * the current PEM data.
-     * @throws IOException if a problem exists creating the fingerprint
      */
     @CheckForNull
-    public String getPublicKeyFingerprint() throws IOException {
+    public String getPublicKeyFingerprint() {
         PublicKey key = toPublicKey();
         if (key == null) {
             return null;

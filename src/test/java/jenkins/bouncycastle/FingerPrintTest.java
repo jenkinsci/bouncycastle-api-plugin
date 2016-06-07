@@ -31,6 +31,7 @@ import java.io.IOException;
 import java.net.URISyntaxException;
 import java.security.NoSuchAlgorithmException;
 import java.security.Security;
+import java.security.UnrecoverableKeyException;
 
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -51,7 +52,7 @@ public class FingerPrintTest {
     }
 
     @Test
-    public void testPrivateFingerprint() throws IOException {
+    public void testPrivateFingerprint() throws IOException, UnrecoverableKeyException {
         PEMManager pemCodec = new PEMManager(PEM_FILE);
         assertEquals(PRIVATE_KEY_FP, pemCodec.getPrivateKeyFingerprint());
 
@@ -61,7 +62,7 @@ public class FingerPrintTest {
     }
 
     @Test
-    public void testPublicFingerprint() throws IOException {
+    public void testPublicFingerprint() throws IOException, UnrecoverableKeyException {
         PEMManager pemCodec = new PEMManager(PEM_FILE);
         assertEquals(PUBLIC_KEY_FP, pemCodec.getPublicKeyFingerprint());
 
@@ -71,7 +72,7 @@ public class FingerPrintTest {
     }
 
     @Test(expected = NoSuchAlgorithmException.class)
-    public void testUnsuportedCodec() throws IOException, NoSuchAlgorithmException {
+    public void testUnsuportedCodec() throws IOException, NoSuchAlgorithmException, UnrecoverableKeyException {
         PEMManager pemCodec = new PEMManager(PEM_FILE);
         PEMManager.getKeyDigest(pemCodec.toPrivateKey(), "XYZ");
     }
