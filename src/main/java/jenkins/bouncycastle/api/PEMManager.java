@@ -315,7 +315,7 @@ public class PEMManager {
      * Algorithms</a>
      */
     @Nonnull
-    public static byte[] getKeyDigestSHA1(@Nonnull Key k) throws IOException {
+    public static byte[] getKeyDigestSHA1(@Nonnull Key k) {
         try {
             return getKeyDigest(k, "SHA1");
         } catch (NoSuchAlgorithmException e) {
@@ -333,7 +333,7 @@ public class PEMManager {
      * Algorithms</a>
      */
     @Nonnull
-    public static byte[] getKeyDigestMD5(@Nonnull Key k) throws IOException {
+    public static byte[] getKeyDigestMD5(@Nonnull Key k) {
         try {
             return getKeyDigest(k, "MD5");
         } catch (NoSuchAlgorithmException e) {
@@ -352,17 +352,10 @@ public class PEMManager {
      * @throws NoSuchAlgorithmException when provided digest algorithm is not available
      */
     @Nonnull
-    public static byte[] getKeyDigest(@Nonnull Key k, @Nonnull String algorithm) throws IOException, NoSuchAlgorithmException {
-        MessageDigest md5 = MessageDigest.getInstance(algorithm);
-
-        DigestInputStream in = new DigestInputStream(new ByteArrayInputStream(k.getEncoded()), md5);
-        try {
-            while (in.read(new byte[128]) > 0)
-                ; // simply discard the input
-        } finally {
-            in.close();
-        }
-        return md5.digest();
+    public static byte[] getKeyDigest(@Nonnull Key k, @Nonnull String algorithm) throws NoSuchAlgorithmException {
+        MessageDigest md = MessageDigest.getInstance(algorithm);
+        md.update(k.getEncoded());
+        return md.digest();
     }
 
     /**
@@ -376,8 +369,9 @@ public class PEMManager {
         char[] hex = Hex.encodeHex(data);
         StringBuilder buf = new StringBuilder();
         for (int i = 0; i < hex.length; i += 2) {
-            if (buf.length() > 0)
+            if (buf.length() > 0) {
                 buf.append(':');
+            }
             buf.append(hex, i, 2);
         }
         return buf.toString();
