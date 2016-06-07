@@ -118,20 +118,22 @@ public final class PEMEncodable {
      * Creates a {@link PEMEncodable} by decoding PEM formated data from a {@link String}
      * 
      * @param pem {@link String} with the PEM data
-     * @param passphrase passphrase for the encrypted PEM data. null if PEM data is not passphrase protected
+     * @param passphrase passphrase for the encrypted PEM data. null if PEM data is not passphrase protected. The caller
+     * is responsible for zeroing out the char[] after use to ensure the password does not stay in memory, e.g. with
+     * <code>Arrays.fill(passphrase, (char)0)</code>
      * @return {@link PEMEncodable} object
      * @throws IOException launched if a problem exists reading the PEM information
      * @throws UnrecoverableKeyException in case PEM is passphrase protected and none or wrong is provided
      */
     @Nonnull
-    public static PEMEncodable decode(@Nonnull String pem, @Nullable final String passphrase)
+    public static PEMEncodable decode(@Nonnull String pem, @Nullable final char[] passphrase)
             throws IOException, UnrecoverableKeyException {
         PasswordFinder pwf = null;
         if (passphrase != null) {
             pwf = new PasswordFinder() {
                 @Override
                 public char[] getPassword() {
-                    return passphrase.toCharArray();
+                    return passphrase;
                 }
             };
         }
@@ -180,12 +182,14 @@ public final class PEMEncodable {
      * Creates a {@link PEMEncodable} by reading a PEM file
      * 
      * @param pemFile {@link File} pointing to the PEM file to read
-     * @param passphrase passphrase for the encrypted PEM data. null if PEM data is not passphrase protected
+     * @param passphrase passphrase for the encrypted PEM data. null if PEM data is not passphrase protected. The caller
+     * is responsible for zeroing out the char[] after use to ensure the password does not stay in memory, e.g. with
+     * <code>Arrays.fill(passphrase, (char)0)</code>
      * @throws IOException launched if a problem exists reading the PEM information or the {@link File}
      * @throws UnrecoverableKeyException in case PEM is passphrase protected and none or wrong is provided
      */
     @Nonnull
-    public static PEMEncodable read(@Nonnull File pemFile, @Nullable String passphrase)
+    public static PEMEncodable read(@Nonnull File pemFile, @Nullable char[] passphrase)
             throws IOException, UnrecoverableKeyException {
         return decode(FileUtils.readFileToString(pemFile), passphrase);
     }

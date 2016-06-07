@@ -83,7 +83,7 @@ public class EncodignDecodingTest {
 
     @Test
     public void testReadPrivateKeyWithPasswordPEM() throws Exception {
-        PEMEncodable pemManager = PEMEncodable.read(new File(PRIVATE_KEY_PW_PEM.toURI()), PRIVATE_KEY_PW);
+        PEMEncodable pemManager = PEMEncodable.read(new File(PRIVATE_KEY_PW_PEM.toURI()), PRIVATE_KEY_PW.toCharArray());
 
         assertEquals(
                 new String(Base64.encode(pemManager.toKeyPair().getPrivate().getEncoded()), StandardCharsets.UTF_8),
