@@ -384,7 +384,8 @@ public class PEMManager {
      * @param data to be encoded
      * @return base 64 formatted string
      */
-    public static String encodeBase64(byte[] data) {
+    @Nonnull
+    public static String encodeBase64(@Nonnull byte[] data) {
         return new String(Base64.encode(data), StandardCharsets.UTF_8);
     }
 
@@ -394,7 +395,8 @@ public class PEMManager {
      * @param data to be decoded
      * @return decoded data
      */
-    public static byte[] decodeBase64(String data) {
+    @Nonnull
+    public static byte[] decodeBase64(@Nonnull String data) {
         return Base64.decode(data);
     }
 }
