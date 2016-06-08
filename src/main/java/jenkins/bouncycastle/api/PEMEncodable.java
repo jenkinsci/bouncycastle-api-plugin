@@ -37,6 +37,9 @@ import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.security.UnrecoverableKeyException;
 import java.security.cert.Certificate;
+import java.security.cert.CertificateException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import javax.annotation.CheckForNull;
 import javax.annotation.Nonnull;
@@ -44,10 +47,22 @@ import javax.annotation.Nullable;
 
 import org.apache.commons.codec.binary.Hex;
 import org.apache.commons.io.FileUtils;
-import org.bouncycastle.openssl.PEMReader;
-import org.bouncycastle.openssl.PEMWriter;
-import org.bouncycastle.openssl.PasswordException;
-import org.bouncycastle.openssl.PasswordFinder;
+import org.bouncycastle.asn1.pkcs.PrivateKeyInfo;
+import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo;
+import org.bouncycastle.cert.X509CertificateHolder;
+import org.bouncycastle.cert.jcajce.JcaX509CertificateConverter;
+import org.bouncycastle.openssl.PEMDecryptorProvider;
+import org.bouncycastle.openssl.PEMEncryptedKeyPair;
+import org.bouncycastle.openssl.PEMKeyPair;
+import org.bouncycastle.openssl.PEMParser;
+import org.bouncycastle.openssl.jcajce.JcaPEMKeyConverter;
+import org.bouncycastle.openssl.jcajce.JcaPEMWriter;
+import org.bouncycastle.openssl.jcajce.JceOpenSSLPKCS8DecryptorProviderBuilder;
+import org.bouncycastle.openssl.jcajce.JcePEMDecryptorProviderBuilder;
+import org.bouncycastle.operator.InputDecryptorProvider;
+import org.bouncycastle.operator.OperatorCreationException;
+import org.bouncycastle.pkcs.PKCS8EncryptedPrivateKeyInfo;
+import org.bouncycastle.pkcs.PKCSException;
 import org.bouncycastle.util.encoders.Base64;
 
 /**
@@ -128,23 +143,51 @@ public final class PEMEncodable {
     @Nonnull
     public static PEMEncodable decode(@Nonnull String pem, @Nullable final char[] passphrase)
             throws IOException, UnrecoverableKeyException {
-        PasswordFinder pwf = null;
-        if (passphrase != null) {
-            pwf = new PasswordFinder() {
-                @Override
-                public char[] getPassword() {
-                    return passphrase;
-                }
-            };
-        }
 
-        PEMReader parser = new PEMReader(new StringReader(pem), pwf);
-        try {
-            return new PEMEncodable(parser.readObject());
-        } catch (PasswordException pwE) {
+        try (PEMParser parser = new PEMParser(new StringReader(pem));) {
+
+            Object object = parser.readObject();
+
+            JcaPEMKeyConverter kConv = new JcaPEMKeyConverter().setProvider("BC");
+
+            // handle supported PEM formats.
+            if (object instanceof PEMEncryptedKeyPair) {
+                if (passphrase != null) {
+                    PEMDecryptorProvider dp = new JcePEMDecryptorProviderBuilder().build(passphrase);
+                    PEMEncryptedKeyPair ekp = (PEMEncryptedKeyPair) object;
+                    return new PEMEncodable(kConv.getKeyPair(ekp.decryptKeyPair(dp)));
+                } else {
+                    throw new UnrecoverableKeyException();
+                }
+            } else if (object instanceof PKCS8EncryptedPrivateKeyInfo) {
+                if (passphrase != null) {
+                    InputDecryptorProvider dp = new JceOpenSSLPKCS8DecryptorProviderBuilder().build(passphrase);
+                    PKCS8EncryptedPrivateKeyInfo epk = (PKCS8EncryptedPrivateKeyInfo) object;
+                    return new PEMEncodable(kConv.getPrivateKey(epk.decryptPrivateKeyInfo(dp)));
+                } else {
+                    throw new UnrecoverableKeyException();
+                }
+            } else if (object instanceof PEMKeyPair) {
+                return new PEMEncodable(kConv.getKeyPair((PEMKeyPair) object));
+            } else if (object instanceof PrivateKeyInfo) {
+                return new PEMEncodable(kConv.getPrivateKey((PrivateKeyInfo) object));
+            } else if (object instanceof SubjectPublicKeyInfo) {
+                return new PEMEncodable(kConv.getPublicKey((SubjectPublicKeyInfo) object));
+            } else if (object instanceof X509CertificateHolder) {
+                JcaX509CertificateConverter cConv = new JcaX509CertificateConverter().setProvider("BC");
+                return new PEMEncodable(cConv.getCertificate((X509CertificateHolder) object));
+            } else {
+                throw new IOException(
+                        "Could not parse PEM, only key pairs, private keys, public keys and certificates are supported. Received "
+                                + object.getClass().getName());
+            }
+        } catch (OperatorCreationException e) {
+            throw new IOException(e.getMessage(), e);
+        } catch (PKCSException e) {
+            LOGGER.log(Level.WARNING, "Could not read PEM encrypted information", e);
             throw new UnrecoverableKeyException();
-        } finally {
-            parser.close();
+        } catch (CertificateException e) {
+            throw new IOException("Could not read certificate", e);
         }
     }
 
@@ -157,7 +200,7 @@ public final class PEMEncodable {
     @Nonnull
     public String encode() throws IOException {
         StringWriter sw = new StringWriter();
-        PEMWriter w = new PEMWriter(sw);
+        JcaPEMWriter w = new JcaPEMWriter(sw);
         try {
             w.writeObject(object);
         } finally {
@@ -217,9 +260,10 @@ public final class PEMEncodable {
      */
     @CheckForNull
     public KeyPair toKeyPair() {
+
         if (object instanceof KeyPair) {
             return (KeyPair) object;
-        } // We will need conversion here on BC 1.54
+        }
         return null;
     }
 
@@ -424,4 +468,6 @@ public final class PEMEncodable {
     private static byte[] decodeBase64(@Nonnull String data) {
         return Base64.decode(data);
     }
+
+    private static final Logger LOGGER = Logger.getLogger(PEMEncodable.class.getName());
 }
