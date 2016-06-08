@@ -33,7 +33,7 @@
   </parent>
 
   <artifactId>bouncycastle-api</artifactId>
-  <version>1.648-SNAPSHOT</version>
+  <version>1.649-SNAPSHOT</version>
   <packaging>hpi</packaging>
 
   <name>bouncycastle API Plugin</name>
