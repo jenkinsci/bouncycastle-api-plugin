@@ -9,9 +9,9 @@ On Jenkins core 1.648, Bouncy Castle was bumped from version `1.47` to `1.54` as
 * Jenkins core bumped instance-identity-plugin:  [pom.xml (v 1.647) ](https://github.com/jenkinsci/jenkins/blob/stable-1.647/war/pom.xml#L107)-> [pom.xml (v 1.648)](https://github.com/jenkinsci/jenkins/blob/jenkins-1.648/war/pom.xml#L100)
 
 **Problems found:**
-* Plugins running in Jenkins < 1.648 get 1.47 from the parent class loader (in the default class loading strategy). If they include a later version in their own classpath, only "new" classes are seen from their referenced JAR.
-* Plugins running in Jenkins >= 1.648 get 1.54 from the parent class loader (in the default class loading strategy). If they include an earlier version in their own classpath, only "removed" classes are seen from their referenced JAR.
-* If the plugin is using JCA instead of BC classes directly usually the plugin works, but if ran in an BC 1.47 Jenkins core, there will be missing algorithms.
+* Plugins running in Jenkins < `1.648` get `1.47` from the parent class loader (in the default class loading strategy). If they include a later version in their own classpath, only "new" classes are seen from their referenced JAR.
+* Plugins running in Jenkins >= `1.648` get `1.54` from the parent class loader (in the default class loading strategy). If they include an earlier version in their own classpath, only "removed" classes are seen from their referenced JAR.
+* If the plugin is using JCA instead of BC classes directly usually the plugin works, but if ran in an BC `1.47` Jenkins core, there will be missing algorithms.
 * Plugins are introducing different versions of BC which adds to de mix, potentially producing unpredictable results
 
 **Some considerations:**
