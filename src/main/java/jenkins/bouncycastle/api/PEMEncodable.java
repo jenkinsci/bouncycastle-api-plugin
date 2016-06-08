@@ -170,6 +170,7 @@ public final class PEMEncodable {
      * Creates a {@link PEMEncodable} by reading a PEM file
      * 
      * @param pemFile {@link File} pointing to the PEM file to read
+     * @return {@link PEMEncodable} object
      * @throws IOException launched if a problem exists reading the PEM information or the {@link File}
      * @throws UnrecoverableKeyException in case PEM is passphrase protected and none or wrong is provided
      */
@@ -185,6 +186,7 @@ public final class PEMEncodable {
      * @param passphrase passphrase for the encrypted PEM data. null if PEM data is not passphrase protected. The caller
      * is responsible for zeroing out the char[] after use to ensure the password does not stay in memory, e.g. with
      * <code>Arrays.fill(passphrase, (char)0)</code>
+     * @return {@link PEMEncodable} object
      * @throws IOException launched if a problem exists reading the PEM information or the {@link File}
      * @throws UnrecoverableKeyException in case PEM is passphrase protected and none or wrong is provided
      */
