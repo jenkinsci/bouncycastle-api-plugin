@@ -433,7 +433,7 @@ public final class PEMEncodable {
     @Nonnull
     private static String encodeBase64(@Nonnull byte[] data) {
         try {
-            return new String(Base64.encode(data), "UTF_8");
+            return new String(Base64.encode(data), "UTF-8");
         } catch (UnsupportedEncodingException e) {
             throw new AssertionError(
                     "UTF-8 char-set support is mandated by Java Language Specification. See https://docs.oracle.com/javase/6/docs/api/java/nio/charset/Charset.html");
