@@ -28,6 +28,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.StringReader;
 import java.io.StringWriter;
+import java.io.UnsupportedEncodingException;
 import java.nio.charset.StandardCharsets;
 import java.security.Key;
 import java.security.KeyFactory;
@@ -156,7 +157,9 @@ public final class PEMEncodable {
             }
 
             return new PEMEncodable(object);
-        } catch (PasswordException | InvalidKeySpecException pwE) {
+        } catch (PasswordException pwE) {
+            throw new UnrecoverableKeyException();
+        } catch (InvalidKeySpecException ikE) {
             throw new UnrecoverableKeyException();
         } catch (NoSuchAlgorithmException e) {
             throw new AssertionError(
@@ -429,7 +432,13 @@ public final class PEMEncodable {
      */
     @Nonnull
     private static String encodeBase64(@Nonnull byte[] data) {
-        return new String(Base64.encode(data), StandardCharsets.UTF_8);
+        try {
+            return new String(Base64.encode(data), "UTF_8");
+        } catch (UnsupportedEncodingException e) {
+            throw new AssertionError(
+                    "UTF-8 char-set support is mandated by Java Language Specification. See https://docs.oracle.com/javase/6/docs/api/java/nio/charset/Charset.html");
+            
+        }
     }
 
     /**
