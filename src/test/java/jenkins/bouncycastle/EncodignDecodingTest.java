@@ -229,12 +229,22 @@ public class EncodignDecodingTest {
     
     
     @Test
-    @Issue(value="JENKINS-35661") 
+    @Issue(value = "JENKINS-35661")
     public void testReadKeyPairFromPCKS8PEM() throws Exception {
-        PEMEncodable pemEnc = PEMEncodable.read(getResourceFile("private-key-pcks8.pem"));
-        assertNotNull(pemEnc.toKeyPair());
-        assertNotNull(pemEnc.toPrivateKey());
-        assertNotNull(pemEnc.toPublicKey());
+        PEMEncodable pemPCKS8 = PEMEncodable.read(getResourceFile("private-key-pcks8.pem"));
+
+        //Check PEMEncodable is returning not-null values in all the cases
+        assertNotNull(pemPCKS8.toKeyPair());
+        assertNotNull(pemPCKS8.toPrivateKey());
+        assertNotNull(pemPCKS8.toPublicKey());
+
+        //Compare against PCKS1 form
+        PEMEncodable pemPCKS1 = PEMEncodable.read(getResourceFile("private-key.pem"));
+        assertArrayEquals(pemPCKS8.toPrivateKey().getEncoded(), pemPCKS1.toPrivateKey().getEncoded());
+        assertArrayEquals(pemPCKS8.toPublicKey().getEncoded(), pemPCKS1.toPublicKey().getEncoded());
+
+        //Reencode both forms and check they are equal
+        assertEquals(pemPCKS8.encode(), pemPCKS1.encode());
     }
 
 }
