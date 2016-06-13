@@ -30,6 +30,7 @@ import java.io.StringReader;
 import java.io.StringWriter;
 import java.nio.charset.StandardCharsets;
 import java.security.Key;
+import java.security.KeyFactory;
 import java.security.KeyPair;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -37,6 +38,9 @@ import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.security.UnrecoverableKeyException;
 import java.security.cert.Certificate;
+import java.security.interfaces.RSAPrivateCrtKey;
+import java.security.spec.InvalidKeySpecException;
+import java.security.spec.RSAPublicKeySpec;
 
 import javax.annotation.CheckForNull;
 import javax.annotation.Nonnull;
@@ -140,9 +144,23 @@ public final class PEMEncodable {
 
         PEMReader parser = new PEMReader(new StringReader(pem), pwf);
         try {
-            return new PEMEncodable(parser.readObject());
-        } catch (PasswordException pwE) {
+            Object object = parser.readObject();
+
+            // JENKINS-35661 in this case we know how to get the public key too
+            if (object instanceof RSAPrivateCrtKey) {
+                // obtain public key spec from the private key
+                RSAPrivateCrtKey rsaPK = (RSAPrivateCrtKey) object;
+                RSAPublicKeySpec pubKeySpec = new RSAPublicKeySpec(rsaPK.getModulus(), rsaPK.getPublicExponent());
+                KeyFactory kf = KeyFactory.getInstance("RSA");
+                return new PEMEncodable(new KeyPair(kf.generatePublic(pubKeySpec), rsaPK));
+            }
+
+            return new PEMEncodable(object);
+        } catch (PasswordException | InvalidKeySpecException pwE) {
             throw new UnrecoverableKeyException();
+        } catch (NoSuchAlgorithmException e) {
+            throw new AssertionError(
+                    "RSA algorithm support is mandated by Java Language Specification. See https://docs.oracle.com/javase/7/docs/api/java/security/KeyFactory.html");
         } finally {
             parser.close();
         }
