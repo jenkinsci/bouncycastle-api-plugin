@@ -246,5 +246,25 @@ public class EncodignDecodingTest {
         //Reencode both forms and check they are equal
         assertEquals(pemPCKS8.encode(), pemPCKS1.encode());
     }
+    
+    @Test
+    @Issue(value = "JENKINS-35661") //make sure it works with a key with a public exponent other than 65537
+    public void testReadKeyPairFromPCKS8Exp3PEM() throws Exception {
+        PEMEncodable pemPCKS8 = PEMEncodable.read(getResourceFile("private-key-exp3-pcks8.pem"));
+
+        //Check PEMEncodable is returning not-null values in all the cases
+        assertNotNull(pemPCKS8.toKeyPair());
+        assertNotNull(pemPCKS8.toPrivateKey());
+        assertNotNull(pemPCKS8.toPublicKey());
+
+        //Compare against PCKS1 form
+        PEMEncodable pemPCKS1 = PEMEncodable.read(getResourceFile("private-key-exp3.pem"));
+        assertArrayEquals(pemPCKS8.toPrivateKey().getEncoded(), pemPCKS1.toPrivateKey().getEncoded());
+        assertArrayEquals(pemPCKS8.toPublicKey().getEncoded(), pemPCKS1.toPublicKey().getEncoded());
+
+        //Reencode both forms and check they are equal
+        assertEquals(pemPCKS8.encode(), pemPCKS1.encode());
+    }
+
 
 }
