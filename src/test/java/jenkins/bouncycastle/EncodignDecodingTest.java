@@ -24,6 +24,7 @@
 
 package jenkins.bouncycastle;
 
+import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
@@ -41,6 +42,7 @@ import org.junit.BeforeClass;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
+import org.jvnet.hudson.test.Issue;
 
 import jenkins.bouncycastle.api.PEMEncodable;
 
@@ -223,6 +225,16 @@ public class EncodignDecodingTest {
         PEMEncodable.create(pemEnc.toKeyPair()).write(pemFileNew);
 
         assertEquals(FileUtils.readFileToString(PRIVATE_KEY_PEM), FileUtils.readFileToString(pemFileNew));
+    }
+    
+    
+    @Test
+    @Issue(value="JENKINS-35661") 
+    public void testReadKeyPairFromPCKS8PEM() throws Exception {
+        PEMEncodable pemEnc = PEMEncodable.read(getResourceFile("private-key-pcks8.pem"));
+        assertNotNull(pemEnc.toKeyPair());
+        assertNotNull(pemEnc.toPrivateKey());
+        assertNotNull(pemEnc.toPublicKey());
     }
 
 }
