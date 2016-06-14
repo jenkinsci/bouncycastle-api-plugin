@@ -55,6 +55,7 @@ import org.bouncycastle.asn1.pkcs.PrivateKeyInfo;
 import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo;
 import org.bouncycastle.cert.X509CertificateHolder;
 import org.bouncycastle.cert.jcajce.JcaX509CertificateConverter;
+import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.openssl.PEMDecryptorProvider;
 import org.bouncycastle.openssl.PEMEncryptedKeyPair;
 import org.bouncycastle.openssl.PEMKeyPair;
@@ -69,6 +70,8 @@ import org.bouncycastle.pkcs.PKCS8EncryptedPrivateKeyInfo;
 import org.bouncycastle.pkcs.PKCSException;
 import org.bouncycastle.util.encoders.Base64;
 
+import hudson.remoting.Channel;
+
 /**
  * A class that provides an API to manager PEM format, providing additional methods to handle Keys, Certificates,
  * Fingerprints, etc The supported algorithms will depend on the underlying version of BouncyCastle
@@ -77,6 +80,7 @@ import org.bouncycastle.util.encoders.Base64;
  */
 public final class PEMEncodable {
 
+    private static final String BOUNCYCASTLE_REGISTERED = "bouncycastle.registered";
     /**
      * Stores the internal Bouncy Castle or JCA object
      */
@@ -487,5 +491,24 @@ public final class PEMEncodable {
         return Base64.decode(data);
     }
 
+    /**
+     * Registers bouncy castle on the slave JVM
+     * 
+     * @param channel to the slave
+     * @throws Exception if there is a problem registering bouncycastle
+     */
+    public static boolean registerBCOnSlave(Channel channel) throws Exception {
+        if (channel.getProperty(BOUNCYCASTLE_REGISTERED) == null) {
+            // pre-loading the bouncyclastle jar to make sure the JVM reconizes the signature
+            channel.preloadJar(PEMEncodable.class.getClassLoader(), BouncyCastleProvider.class);
+            boolean result = channel.call(new BCRegisterer()).booleanValue();
+            if (result) {
+                channel.setProperty(BOUNCYCASTLE_REGISTERED, Boolean.TRUE);
+            }
+            return result;
+        }
+        return true;
+    }
+    
     private static final Logger LOGGER = Logger.getLogger(PEMEncodable.class.getName());
 }
