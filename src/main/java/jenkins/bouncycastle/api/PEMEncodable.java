@@ -495,9 +495,10 @@ public final class PEMEncodable {
      * Registers bouncy castle on the slave JVM
      * 
      * @param channel to the slave
+     * @return result of the operation
      * @throws Exception if there is a problem registering bouncycastle
      */
-    public static boolean registerBCOnSlave(Channel channel) throws Exception {
+    public static boolean registerBCOnSlave(@Nonnull Channel channel) throws Exception {
         if (channel.getProperty(BOUNCYCASTLE_REGISTERED) == null) {
             // pre-loading the bouncyclastle jar to make sure the JVM reconizes the signature
             channel.preloadJar(PEMEncodable.class.getClassLoader(), BouncyCastleProvider.class);

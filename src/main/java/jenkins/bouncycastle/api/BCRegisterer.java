@@ -41,8 +41,6 @@ public class BCRegisterer extends MasterToSlaveCallable<Boolean, Exception> {
 
     /**
      * Constructor.
-     *
-     * @param listener the listener to pass to the agent.
      */
     public BCRegisterer() {
     }
