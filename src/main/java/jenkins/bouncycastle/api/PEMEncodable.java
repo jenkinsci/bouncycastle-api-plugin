@@ -30,6 +30,7 @@ import java.io.StringReader;
 import java.io.StringWriter;
 import java.nio.charset.StandardCharsets;
 import java.security.Key;
+import java.security.KeyFactory;
 import java.security.KeyPair;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -38,6 +39,9 @@ import java.security.PublicKey;
 import java.security.UnrecoverableKeyException;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
+import java.security.interfaces.RSAPrivateCrtKey;
+import java.security.spec.InvalidKeySpecException;
+import java.security.spec.RSAPublicKeySpec;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -170,7 +174,18 @@ public final class PEMEncodable {
             } else if (object instanceof PEMKeyPair) {
                 return new PEMEncodable(kConv.getKeyPair((PEMKeyPair) object));
             } else if (object instanceof PrivateKeyInfo) {
-                return new PEMEncodable(kConv.getPrivateKey((PrivateKeyInfo) object));
+                PrivateKey pk = kConv.getPrivateKey((PrivateKeyInfo) object);
+
+                // JENKINS-35661 in this case we know how to get the public key too
+                if (pk instanceof RSAPrivateCrtKey) {
+                    // obtain public key spec from the private key
+                    RSAPrivateCrtKey rsaPK = (RSAPrivateCrtKey) pk;
+                    RSAPublicKeySpec pubKeySpec = new RSAPublicKeySpec(rsaPK.getModulus(), rsaPK.getPublicExponent());
+                    KeyFactory kf = KeyFactory.getInstance("RSA");
+                    return new PEMEncodable(new KeyPair(kf.generatePublic(pubKeySpec), rsaPK));
+                }
+
+                return new PEMEncodable(pk);
             } else if (object instanceof SubjectPublicKeyInfo) {
                 return new PEMEncodable(kConv.getPublicKey((SubjectPublicKeyInfo) object));
             } else if (object instanceof X509CertificateHolder) {
@@ -183,11 +198,14 @@ public final class PEMEncodable {
             }
         } catch (OperatorCreationException e) {
             throw new IOException(e.getMessage(), e);
-        } catch (PKCSException e) {
+        } catch (PKCSException | InvalidKeySpecException e) {
             LOGGER.log(Level.WARNING, "Could not read PEM encrypted information", e);
             throw new UnrecoverableKeyException();
         } catch (CertificateException e) {
             throw new IOException("Could not read certificate", e);
+        } catch (NoSuchAlgorithmException e) {
+            throw new AssertionError(
+                    "RSA algorithm support is mandated by Java Language Specification. See https://docs.oracle.com/javase/7/docs/api/java/security/KeyFactory.html");
         }
     }
 
