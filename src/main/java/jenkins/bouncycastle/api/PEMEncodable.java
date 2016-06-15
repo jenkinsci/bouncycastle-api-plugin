@@ -77,7 +77,6 @@ import org.bouncycastle.util.encoders.Base64;
  */
 public final class PEMEncodable {
 
-   
     /**
      * Stores the internal Bouncy Castle or JCA object
      */
@@ -487,6 +486,6 @@ public final class PEMEncodable {
     private static byte[] decodeBase64(@Nonnull String data) {
         return Base64.decode(data);
     }
-    
+
     private static final Logger LOGGER = Logger.getLogger(PEMEncodable.class.getName());
 }
