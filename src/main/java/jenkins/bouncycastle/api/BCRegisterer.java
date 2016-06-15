@@ -30,10 +30,13 @@ import javax.annotation.Nonnull;
 
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 
+import hudson.remoting.Channel;
+import hudson.remoting.Future;
 import jenkins.security.MasterToSlaveCallable;
 
 /**
- * Callable to start the remote agent.
+ * Allows registering Bouncy Castle on a remote agent. Just call {@link registerBCOnSlave} and check for the
+ * {@link Future} result
  */
 public class BCRegisterer extends MasterToSlaveCallable<Boolean, Exception> {
 
@@ -42,7 +45,7 @@ public class BCRegisterer extends MasterToSlaveCallable<Boolean, Exception> {
     /**
      * Constructor.
      */
-    public BCRegisterer() {
+    private BCRegisterer() {
     }
 
     /**
@@ -52,5 +55,30 @@ public class BCRegisterer extends MasterToSlaveCallable<Boolean, Exception> {
     public Boolean call() throws Exception {
         Security.addProvider(new BouncyCastleProvider());
         return Boolean.TRUE;
+    }
+
+    private static final String BOUNCYCASTLE_REGISTERED = "bouncycastle.registered";
+
+    /**
+     * Registers bouncy castle on the slave JVM
+     * 
+     * @param channel to the slave
+     * @return Future with the result of the operation
+     * @throws Exception if there is a problem registering bouncycastle
+     */
+    @Nonnull
+    public static Future<Boolean> registerBCOnSlave(@Nonnull Channel channel) throws Exception {
+        Object property = channel.getProperty(BOUNCYCASTLE_REGISTERED);
+        Future<Boolean> future = property instanceof Future ? (Future<Boolean>) property : null;
+
+        if (future != null) {
+            return future;
+        } else {
+            // pre-loading the bouncyclastle jar to make sure the JVM reconizes the signature
+            channel.preloadJar(PEMEncodable.class.getClassLoader(), BouncyCastleProvider.class);
+            future = channel.callAsync(new BCRegisterer());
+            channel.setProperty(BOUNCYCASTLE_REGISTERED, future);
+            return future;
+        }
     }
 }
