@@ -24,8 +24,13 @@
 
 package jenkins.bouncycastle.api;
 
+import hudson.remoting.ChannelProperty;
+import java.io.IOException;
 import java.security.Security;
 
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import javax.annotation.Nonnull;
 
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
@@ -35,12 +40,21 @@ import hudson.remoting.Future;
 import jenkins.security.MasterToSlaveCallable;
 
 /**
- * Allows registering Bouncy Castle on a remote agent. Just call {@link registerBCOnSlave} and check for the
+ * Allows registering Bouncy Castle on a remote agent. Just call {@link #registerBCOnSlave} and check for the
  * {@link Future} result
  */
 public class BCRegisterer extends MasterToSlaveCallable<Boolean, Exception> {
 
+    /**
+     * Ensure standardized serialization.
+     */
     private static final long serialVersionUID = 1L;
+
+    /**
+     * The property that holds the future for registration.
+     */
+    private static final ChannelProperty<Future> BOUNCYCASTLE_REGISTERED
+            = new ChannelProperty<Future>(Future.class, "Bouncy Castle Registered");
 
     /**
      * Constructor.
@@ -57,8 +71,6 @@ public class BCRegisterer extends MasterToSlaveCallable<Boolean, Exception> {
         return Boolean.TRUE;
     }
 
-    private static final String BOUNCYCASTLE_REGISTERED = "bouncycastle.registered";
-
     /**
      * Registers bouncy castle on the slave JVM
      * 
@@ -67,18 +79,41 @@ public class BCRegisterer extends MasterToSlaveCallable<Boolean, Exception> {
      * @throws Exception if there is a problem registering bouncycastle
      */
     @Nonnull
-    public static Future<Boolean> registerBCOnSlave(@Nonnull Channel channel) throws Exception {
-        Object property = channel.getProperty(BOUNCYCASTLE_REGISTERED);
-        Future<Boolean> future = property instanceof Future ? (Future<Boolean>) property : null;
+    public static void registerBCOnSlave(@Nonnull Channel channel) throws IOException, InterruptedException {
+        Future future = channel.getProperty(BOUNCYCASTLE_REGISTERED);
 
-        if (future != null) {
-            return future;
-        } else {
-            // pre-loading the bouncyclastle jar to make sure the JVM reconizes the signature
-            channel.preloadJar(PEMEncodable.class.getClassLoader(), BouncyCastleProvider.class);
-            future = channel.callAsync(new BCRegisterer());
-            channel.setProperty(BOUNCYCASTLE_REGISTERED, future);
-            return future;
+        try {
+            if (future != null) {
+                future.get(1, TimeUnit.MINUTES);
+            } else {
+                // pre-loading the bouncyclastle jar to make sure the JVM recognizes the signature
+                channel.preloadJar(PEMEncodable.class.getClassLoader(), BouncyCastleProvider.class);
+                // check again just in case we have a parallel pre-loader
+                future = channel.getProperty(BOUNCYCASTLE_REGISTERED);
+                if (future == null) {
+                    // if we end up here in parallel it will be an idempotent operation, so no harm anyway
+                    future = channel.callAsync(new BCRegisterer());
+                    channel.setProperty(BOUNCYCASTLE_REGISTERED, future);
+                }
+                future.get(1, TimeUnit.MINUTES);
+            }
+        } catch (IOException e) {
+            throw e;
+        } catch (TimeoutException e) {
+            throw new IOException("Remote operation timed out", e);
+        } catch (InterruptedException e) {
+            throw e;
+        } catch (ExecutionException e) {
+            if (e.getCause() instanceof IOException) {
+                throw new IOException(e);
+            }
+            if (e.getCause() instanceof SecurityException) {
+                throw new SecurityException(e);
+            }
+            if (e.getCause() instanceof LinkageError) {
+                throw new LinkageError("Could not register bouncy castle", e);
+            }
+            throw new IOException("Could not register bouncy castle", e);
         }
     }
 }
