@@ -40,8 +40,9 @@ import hudson.remoting.Future;
 import jenkins.security.MasterToSlaveCallable;
 
 /**
- * Allows registering Bouncy Castle on a remote agent. Just call {@link #on} and check for the
- * {@link Future} result
+ * Allows registering Bouncy Castle on a remote agent. Just call {@link #on(Channel)}.
+ *
+ * @since 1.648.2
  */
 public class InstallBouncyCastleJCAProvider extends MasterToSlaveCallable<Boolean, Exception> {
 
@@ -75,8 +76,10 @@ public class InstallBouncyCastleJCAProvider extends MasterToSlaveCallable<Boolea
      * Registers bouncy castle on the slave JVM
      * 
      * @param channel to the slave
-     * @return Future with the result of the operation
-     * @throws Exception if there is a problem registering bouncycastle
+     * @throws IOException if there is a problem registering bouncycastle
+     * @throws InterruptedException if interrupted while trying to register
+     * @throws SecurityException if the remote JVM has a security manager
+     * @throws LinkageError if there was a classloading issue on the remote agent.
      */
     @Nonnull
     public static void on(@Nonnull Channel channel) throws IOException, InterruptedException {
