@@ -40,10 +40,10 @@ import hudson.remoting.Future;
 import jenkins.security.MasterToSlaveCallable;
 
 /**
- * Allows registering Bouncy Castle on a remote agent. Just call {@link #registerBCOnSlave} and check for the
+ * Allows registering Bouncy Castle on a remote agent. Just call {@link #on} and check for the
  * {@link Future} result
  */
-public class BCRegisterer extends MasterToSlaveCallable<Boolean, Exception> {
+public class InstallBouncyCastleJCAProvider extends MasterToSlaveCallable<Boolean, Exception> {
 
     /**
      * Ensure standardized serialization.
@@ -59,7 +59,7 @@ public class BCRegisterer extends MasterToSlaveCallable<Boolean, Exception> {
     /**
      * Constructor.
      */
-    private BCRegisterer() {
+    private InstallBouncyCastleJCAProvider() {
     }
 
     /**
@@ -79,7 +79,7 @@ public class BCRegisterer extends MasterToSlaveCallable<Boolean, Exception> {
      * @throws Exception if there is a problem registering bouncycastle
      */
     @Nonnull
-    public static void registerBCOnSlave(@Nonnull Channel channel) throws IOException, InterruptedException {
+    public static void on(@Nonnull Channel channel) throws IOException, InterruptedException {
         Future future = channel.getProperty(BOUNCYCASTLE_REGISTERED);
 
         try {
@@ -92,7 +92,7 @@ public class BCRegisterer extends MasterToSlaveCallable<Boolean, Exception> {
                 future = channel.getProperty(BOUNCYCASTLE_REGISTERED);
                 if (future == null) {
                     // if we end up here in parallel it will be an idempotent operation, so no harm anyway
-                    future = channel.callAsync(new BCRegisterer());
+                    future = channel.callAsync(new InstallBouncyCastleJCAProvider());
                     channel.setProperty(BOUNCYCASTLE_REGISTERED, future);
                 }
                 future.get(1, TimeUnit.MINUTES);
