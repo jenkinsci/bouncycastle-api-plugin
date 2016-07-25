@@ -95,7 +95,7 @@
       <plugin>
         <groupId>org.jenkins-ci.tools</groupId>
         <artifactId>maven-hpi-plugin</artifactId>
-        <version>1.118-20160725.163653-2</version>
+        <version>1.118</version>
         <configuration>
           <jenkinsCoreVersionOverride>2.16</jenkinsCoreVersionOverride>
         </configuration>
