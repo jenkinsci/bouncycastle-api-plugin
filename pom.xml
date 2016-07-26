@@ -29,7 +29,7 @@
   <parent>
     <groupId>org.jenkins-ci.plugins</groupId>
     <artifactId>plugin</artifactId>
-    <version>2.11</version>
+    <version>2.12</version>
   </parent>
 
   <artifactId>bouncycastle-api</artifactId>
@@ -65,7 +65,7 @@
   </scm>
 
   <properties>
-    <jenkins.version>2.15</jenkins.version>
+    <jenkins.version>2.15</jenkins.version> <!-- TODO bump to 2.16 post release -->
   </properties>
 
   <repositories>
@@ -93,9 +93,9 @@
   <build>
     <plugins>
       <plugin>
+        <!-- TODO remove once 2.16 of jenkins has been released -->
         <groupId>org.jenkins-ci.tools</groupId>
         <artifactId>maven-hpi-plugin</artifactId>
-        <version>1.118</version>
         <configuration>
           <jenkinsCoreVersionOverride>2.16</jenkinsCoreVersionOverride>
         </configuration>
