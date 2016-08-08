@@ -65,7 +65,7 @@
   </scm>
 
   <properties>
-    <jenkins.version>2.15</jenkins.version> <!-- TODO bump to 2.16 post release -->
+    <jenkins.version>2.16</jenkins.version>
   </properties>
 
   <repositories>
@@ -89,18 +89,4 @@
       <version>1.54</version>
     </dependency>
   </dependencies>
-
-  <build>
-    <plugins>
-      <plugin>
-        <!-- TODO remove once 2.16 of jenkins has been released -->
-        <groupId>org.jenkins-ci.tools</groupId>
-        <artifactId>maven-hpi-plugin</artifactId>
-        <configuration>
-          <jenkinsCoreVersionOverride>2.16</jenkinsCoreVersionOverride>
-        </configuration>
-      </plugin>
-    </plugins>
-  </build>
-
 </project>
