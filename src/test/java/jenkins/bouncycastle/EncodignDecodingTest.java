@@ -29,6 +29,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
 import java.io.File;
+import java.io.IOException;
 import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
 import java.security.PublicKey;
@@ -237,4 +238,9 @@ public class EncodignDecodingTest {
         assertNotNull(pemEnc.toPublicKey());
     }
 
+    @Test(expected = IOException.class)
+    @Issue(value = "JENKINS-41978")
+    public void testInvalidPEM() throws Exception {
+        PEMEncodable.decode(FileUtils.readFileToString(getResourceFile("invalid.pem")));
+    }
 }

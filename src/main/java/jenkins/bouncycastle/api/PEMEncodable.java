@@ -152,6 +152,10 @@ public final class PEMEncodable {
 
             Object object = parser.readObject();
 
+            if (object == null) {
+                throw new IOException("Could not parse PEM, only key pairs, private keys, public keys and certificates are supported");
+            }
+
             JcaPEMKeyConverter kConv = new JcaPEMKeyConverter().setProvider("BC");
 
             // handle supported PEM formats.
