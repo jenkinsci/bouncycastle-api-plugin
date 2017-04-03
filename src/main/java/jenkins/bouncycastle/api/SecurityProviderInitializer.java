@@ -25,7 +25,6 @@
 package jenkins.bouncycastle.api;
 
 import java.security.Security;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
@@ -62,9 +61,9 @@ public class SecurityProviderInitializer extends Plugin {
     //@Initializer(before = InitMilestone.STARTED)
     @Restricted(NoExternalUse.class)
     public static void addSecurityProvider() {
-        LOGGER.log(Level.INFO, "Initializing Bouncy Castle security provider.");
+        LOGGER.fine("Initializing Bouncy Castle security provider.");
         Security.addProvider(new BouncyCastleProvider());
-        LOGGER.log(Level.INFO, "Bouncy Castle security provider initialized.");
+        LOGGER.fine("Bouncy Castle security provider initialized.");
     }
 
 }
