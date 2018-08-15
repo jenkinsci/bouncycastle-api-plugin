@@ -70,7 +70,7 @@ import org.bouncycastle.pkcs.PKCSException;
 import org.bouncycastle.util.encoders.Base64;
 
 /**
- * A class that provides an API to manager PEM format, providing additional methods to handle Keys, Certificates,
+ * A class that provides an API to manage PEM format, providing additional methods to handle Keys, Certificates,
  * Fingerprints, etc The supported algorithms will depend on the underlying version of BouncyCastle
  *
  * @since 1.0
