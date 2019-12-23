@@ -40,7 +40,7 @@
   <description>
     This plugin provides an stable API to Bouncy Castle related tasks.
   </description>
-  <url>http://wiki.jenkins-ci.org/display/JENKINS/Bouncy+Castle+API+Plugin</url>
+  <url>https://github.com/jenkinsci/bouncycastle-api-plugin</url>
   <licenses>
     <license>
       <name>The MIT license</name>
