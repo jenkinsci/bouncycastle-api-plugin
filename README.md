@@ -13,6 +13,11 @@ The implementation of this plugin does not expose any classes from Bouncy Castle
 
 Later some other actions would have to be taken in order to fully solve this situation, like having one version of the plugin for each version of Bouncy Castle, etc.
 
+## Release notes
+
+* See [GitHub releases](https://github.com/jenkinsci/bouncycastle-api-plugin/releases/latest) for recent versions
+* See the [changelog archive](./docs/CHANGELOG.md) for version `2.17` and before
+
 ## Motivation
 
 Dependency to multiple Bouncy Castle versions from jenkins core and plugins is causing problems due to the binary incompatibility between versions, the different supported algorithms, etc.
