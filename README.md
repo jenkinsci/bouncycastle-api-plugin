@@ -4,7 +4,7 @@
 [![GitHub release](https://img.shields.io/github/release/jenkinsci/bouncycastle-api-plugin.svg?label=changelog)](https://github.com/jenkinsci/bouncycastle-api-plugin/releases/latest)
 [![Jenkins Plugin Installs](https://img.shields.io/jenkins/plugin/i/bouncycastle-api.svg?color=blue)](https://plugins.jenkins.io/bouncycastle-api)
 
-This plugin provides an stable API to Bouncy Castle related tasks.
+This plugin provides a stable API to Bouncy Castle related tasks.
 Plugins using Bouncy Castle should depend on this plugin and not directly on Bouncy Castle.
 
 ## Implementation
@@ -42,6 +42,5 @@ A possible solution to this problem would to create a plugin (this plugin) from 
 * Load BC into uber class loader.
 * Register BC as a JVM security provider in order to allow other plugins to use JCA API with BC algorithms. 
 * Provide an API to do common tasks like PEM Encoding/Decoding ensuring its stability among BC versions.
-
 
 
