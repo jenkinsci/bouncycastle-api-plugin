@@ -1,8 +1,27 @@
 # Jenkins Bouncy Castle API Plugin
 
-[JENKINS-35291](https://issues.jenkins-ci.org/browse/JENKINS-35291)
+[![Jenkins Plugin](https://img.shields.io/jenkins/plugin/v/bouncycastle-api.svg)](https://plugins.jenkins.io/bouncycastle-api)
+[![GitHub release](https://img.shields.io/github/release/jenkinsci/bouncycastle-api-plugin.svg?label=changelog)](https://github.com/jenkinsci/bouncycastle-api-plugin/releases/latest)
+[![Jenkins Plugin Installs](https://img.shields.io/jenkins/plugin/i/bouncycastle-api.svg?color=blue)](https://plugins.jenkins.io/bouncycastle-api)
+
+This plugin provides a stable API to Bouncy Castle related tasks.
+Plugins using Bouncy Castle should depend on this plugin and not directly on Bouncy Castle.
+
+## Implementation
+
+The implementation of this plugin does not expose any classes from Bouncy Castle, only JCA, allowing plugins to not depend on the specifics of Bouncy Castle.
+
+Later some other actions would have to be taken in order to fully solve this situation, like having one version of the plugin for each version of Bouncy Castle, etc.
+
+## Release notes
+
+* See [GitHub releases](https://github.com/jenkinsci/bouncycastle-api-plugin/releases/latest) for recent versions
+* See the [changelog archive](./docs/CHANGELOG.md) for version `2.17` and before
+
+## Motivation
 
 Dependency to multiple Bouncy Castle versions from jenkins core and plugins is causing problems due to the binary incompatibility between versions, the different supported algorithms, etc.
+See [JENKINS-35291](https://issues.jenkins-ci.org/browse/JENKINS-35291) for the full context.
 
 On Jenkins core 1.648, Bouncy Castle was bumped from version `1.47` to `1.54` as a result of a change in ``instance-identity`` module
 * ``instance-identity-module`` bumped Bouncy Castle from `1.47` to `1.54`: [pom.xml (v 1.4)](https://github.com/jenkinsci/instance-identity-module/blob/instance-identity-1.4/pom.xml#L32) -> [pom.xml (v 1.5.1)](https://github.com/jenkinsci/instance-identity-module/blob/instance-identity-1.5.1/pom.xml#L33)
@@ -24,35 +43,4 @@ A possible solution to this problem would to create a plugin (this plugin) from 
 * Register BC as a JVM security provider in order to allow other plugins to use JCA API with BC algorithms. 
 * Provide an API to do common tasks like PEM Encoding/Decoding ensuring its stability among BC versions.
 
-The implementation of this plugin does not expose any classes from BC, only JCA, allowing plugins to not depend on the specifics of BC.
 
-Later some other actions would have to be taken in order to fully solve this situation, like having one version of the plugin for each version of BC, etc.
-
-This plugin provides an stable API to Bouncy Castle related tasks. Plugins using Bouncy Castle should depend on this plugin and not directly on Bouncy Castle. See also this [plugin's wiki page][wiki]
-
-
-# Environment
-
-The following build environment is required to build this plugin
-
-* `java-1.6` and `maven-3.0.5`
-
-# Build
-
-To build the plugin locally:
-
-    mvn clean verify
-
-# Release
-
-To release the plugin:
-
-    mvn release:prepare release:perform -B
-
-# Test local instance
-
-To test in a local Jenkins instance
-
-    mvn hpi:run
-
-  [wiki]: http://wiki.jenkins-ci.org/display/JENKINS/Bouncy+Castle+API+Plugin
