@@ -24,7 +24,6 @@
 
 package jenkins.bouncycastle.api;
 
-import hudson.model.Computer;
 import hudson.remoting.ChannelProperty;
 import hudson.slaves.SlaveComputer;
 import java.io.IOException;
