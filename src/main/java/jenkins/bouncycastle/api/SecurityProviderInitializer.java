@@ -24,10 +24,8 @@
 
 package jenkins.bouncycastle.api;
 
-import java.security.Security;
 import java.util.logging.Logger;
 
-import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.kohsuke.accmod.Restricted;
 import org.kohsuke.accmod.restrictions.NoExternalUse;
 
@@ -62,7 +60,7 @@ public class SecurityProviderInitializer extends Plugin {
     @Restricted(NoExternalUse.class)
     public static void addSecurityProvider() {
         LOGGER.fine("Initializing Bouncy Castle security provider.");
-        Security.addProvider(new BouncyCastleProvider());
+        BcProviderRegistration.register();
         LOGGER.fine("Bouncy Castle security provider initialized.");
     }
 
