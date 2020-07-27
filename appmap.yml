@@ -1,0 +1,3 @@
+name: bouncycastle-api-plugin
+packages:
+ - path: jenkins.bouncycastle
