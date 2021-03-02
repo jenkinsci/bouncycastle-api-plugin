@@ -1,7 +1,7 @@
 /*
  * The MIT License
  *
- * Copyright (c) 2016, CloudBees, Inc.
+ * Copyright (c) 2016-2021, CloudBees, Inc.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -26,6 +26,8 @@ package jenkins.bouncycastle;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 
 import java.io.File;
 import java.io.IOException;
@@ -64,7 +66,7 @@ public class EncodignDecodingTest {
     private static File CERTIFICATE_PW_PEM;
     private static File CERTIFICATE_PUBLIC_KEY_PW_PEM;
 
-    private static String PRIVATE_KEY_PW = "test";
+    private static final String PRIVATE_KEY_PW = "test";
 
     @Rule
     public TemporaryFolder folder = new TemporaryFolder();
@@ -118,7 +120,7 @@ public class EncodignDecodingTest {
         PEMEncodable pemEncOnlyPrivate = PEMEncodable.create(pemEnc.toPrivateKey());
 
         pemEncOnlyPrivate.write(onlyPrivate);
-        assertEquals(true, Arrays.equals(pemEncOnlyPrivate.toPrivateKey().getEncoded(),
+        assertTrue(Arrays.equals(pemEncOnlyPrivate.toPrivateKey().getEncoded(),
                 pemEnc.toPrivateKey().getEncoded()));
         assertEquals(FileUtils.readFileToString(PRIVATE_KEY_PEM), FileUtils.readFileToString(onlyPrivate));
     }
@@ -134,9 +136,9 @@ public class EncodignDecodingTest {
     @Test
     public void testReadInexistentFromPublicKey() throws Exception {
         PEMEncodable pemEnc = PEMEncodable.read(PUBLIC_KEY_PEM);
-        assertEquals(null, pemEnc.toPrivateKey());
-        assertEquals(null, pemEnc.toKeyPair());
-        assertEquals(null, pemEnc.toCertificate());
+        assertNull(pemEnc.toPrivateKey());
+        assertNull(pemEnc.toKeyPair());
+        assertNull(pemEnc.toCertificate());
     }
 
     @Test
@@ -145,9 +147,9 @@ public class EncodignDecodingTest {
 
         PEMEncodable pemEncOnlyPrivate = PEMEncodable.create(pemEnc.toKeyPair().getPrivate());
 
-        assertEquals(null, pemEncOnlyPrivate.toPublicKey());
-        assertEquals(null, pemEncOnlyPrivate.toKeyPair());
-        assertEquals(null, pemEncOnlyPrivate.toCertificate());
+        assertNull(pemEncOnlyPrivate.toPublicKey());
+        assertNull(pemEncOnlyPrivate.toKeyPair());
+        assertNull(pemEncOnlyPrivate.toCertificate());
 
     }
 

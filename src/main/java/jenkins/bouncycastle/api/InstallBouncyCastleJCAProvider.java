@@ -1,7 +1,7 @@
 /*
  * The MIT License
  *
- * Copyright (c) 2016, CloudBees, Inc.
+ * Copyright (c) 2016-2021, CloudBees, Inc.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -56,7 +56,7 @@ public class InstallBouncyCastleJCAProvider extends MasterToSlaveCallable<Boolea
      * The property that holds the future for registration.
      */
     private static final ChannelProperty<Future> BOUNCYCASTLE_REGISTERED
-            = new ChannelProperty<Future>(Future.class, "Bouncy Castle Registered");
+            = new ChannelProperty<>(Future.class, "Bouncy Castle Registered");
 
     /**
      * Constructor.
@@ -117,12 +117,8 @@ public class InstallBouncyCastleJCAProvider extends MasterToSlaveCallable<Boolea
                 }
                 future.get(1, TimeUnit.MINUTES);
             }
-        } catch (IOException e) {
-            throw e;
         } catch (TimeoutException e) {
             throw new IOException("Remote operation timed out", e);
-        } catch (InterruptedException e) {
-            throw e;
         } catch (ExecutionException e) {
             if (e.getCause() instanceof IOException) {
                 throw new IOException(e);
