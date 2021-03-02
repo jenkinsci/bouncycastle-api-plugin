@@ -48,7 +48,7 @@ import org.jvnet.hudson.test.Issue;
 
 import jenkins.bouncycastle.api.PEMEncodable;
 
-public class EncodignDecodingTest {
+public class EncodingDecodingTest {
 
     @BeforeClass
     public static void setUpBC() {
@@ -83,7 +83,7 @@ public class EncodignDecodingTest {
     }
 
     private static File getResourceFile(String resource) throws URISyntaxException {
-        return new File(EncodignDecodingTest.class.getClassLoader().getResource(resource).toURI());
+        return new File(EncodingDecodingTest.class.getClassLoader().getResource(resource).toURI());
     }
 
     @Test
