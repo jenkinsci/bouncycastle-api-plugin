@@ -27,7 +27,6 @@ package jenkins.bouncycastle.api;
 import hudson.remoting.ChannelProperty;
 import hudson.slaves.SlaveComputer;
 import java.io.IOException;
-import java.security.Security;
 
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
@@ -58,10 +57,16 @@ public class InstallBouncyCastleJCAProvider extends MasterToSlaveCallable<Boolea
     private static final ChannelProperty<Future> BOUNCYCASTLE_REGISTERED
             = new ChannelProperty<>(Future.class, "Bouncy Castle Registered");
 
+    private final boolean prioritize;
+
     /**
      * Constructor.
+     *
+     * @param prioritize whether BC should be prioritized (inserted at 2nd position) in the
+     * JCE providers list, or simply added last.
      */
-    private InstallBouncyCastleJCAProvider() {
+    private InstallBouncyCastleJCAProvider(boolean prioritize) {
+        this.prioritize = prioritize;
     }
 
     /**
@@ -69,7 +74,7 @@ public class InstallBouncyCastleJCAProvider extends MasterToSlaveCallable<Boolea
      */
     @Nonnull
     public Boolean call() throws Exception {
-        Security.addProvider(new BouncyCastleProvider());
+        BcProviderRegistration.register(prioritize);
         return Boolean.TRUE;
     }
 
@@ -112,7 +117,7 @@ public class InstallBouncyCastleJCAProvider extends MasterToSlaveCallable<Boolea
                 future = channel.getProperty(BOUNCYCASTLE_REGISTERED);
                 if (future == null) {
                     // if we end up here in parallel it will be an idempotent operation, so no harm anyway
-                    future = channel.callAsync(new InstallBouncyCastleJCAProvider());
+                    future = channel.callAsync(new InstallBouncyCastleJCAProvider(BcProviderRegistration.PRIORITIZE));
                     channel.setProperty(BOUNCYCASTLE_REGISTERED, future);
                 }
                 future.get(1, TimeUnit.MINUTES);
