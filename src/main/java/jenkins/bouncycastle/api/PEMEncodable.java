@@ -1,7 +1,7 @@
 /*
  * The MIT License
  *
- * Copyright (c) 2016, CloudBees, Inc.
+ * Copyright (c) 2016-2021, CloudBees, Inc.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -24,31 +24,6 @@
 
 package jenkins.bouncycastle.api;
 
-import java.io.File;
-import java.io.IOException;
-import java.io.StringReader;
-import java.io.StringWriter;
-import java.nio.charset.StandardCharsets;
-import java.security.Key;
-import java.security.KeyFactory;
-import java.security.KeyPair;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
-import java.security.PrivateKey;
-import java.security.PublicKey;
-import java.security.UnrecoverableKeyException;
-import java.security.cert.Certificate;
-import java.security.cert.CertificateException;
-import java.security.interfaces.RSAPrivateCrtKey;
-import java.security.spec.InvalidKeySpecException;
-import java.security.spec.RSAPublicKeySpec;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
-import javax.annotation.CheckForNull;
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
-
 import org.apache.commons.codec.binary.Hex;
 import org.apache.commons.io.FileUtils;
 import org.bouncycastle.asn1.pkcs.PrivateKeyInfo;
@@ -67,7 +42,29 @@ import org.bouncycastle.operator.InputDecryptorProvider;
 import org.bouncycastle.operator.OperatorCreationException;
 import org.bouncycastle.pkcs.PKCS8EncryptedPrivateKeyInfo;
 import org.bouncycastle.pkcs.PKCSException;
-import org.bouncycastle.util.encoders.Base64;
+
+import javax.annotation.CheckForNull;
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+import java.io.File;
+import java.io.IOException;
+import java.io.StringReader;
+import java.io.StringWriter;
+import java.security.Key;
+import java.security.KeyFactory;
+import java.security.KeyPair;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.security.PrivateKey;
+import java.security.PublicKey;
+import java.security.UnrecoverableKeyException;
+import java.security.cert.Certificate;
+import java.security.cert.CertificateException;
+import java.security.interfaces.RSAPrivateCrtKey;
+import java.security.spec.InvalidKeySpecException;
+import java.security.spec.RSAPublicKeySpec;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * A class that provides an API to manage PEM format, providing additional methods to handle Keys, Certificates,
@@ -81,7 +78,7 @@ public final class PEMEncodable {
      * Stores the internal Bouncy Castle or JCA object
      */
     @Nonnull
-    private Object object;
+    private final Object object;
 
     private PEMEncodable(@Nonnull Object pemObject) {
         this.object = pemObject;
@@ -148,7 +145,7 @@ public final class PEMEncodable {
     public static PEMEncodable decode(@Nonnull String pem, @Nullable final char[] passphrase)
             throws IOException, UnrecoverableKeyException {
 
-        try (PEMParser parser = new PEMParser(new StringReader(pem));) {
+        try (PEMParser parser = new PEMParser(new StringReader(pem))) {
 
             Object object = parser.readObject();
 
@@ -222,11 +219,8 @@ public final class PEMEncodable {
     @Nonnull
     public String encode() throws IOException {
         StringWriter sw = new StringWriter();
-        JcaPEMWriter w = new JcaPEMWriter(sw);
-        try {
+        try (JcaPEMWriter w = new JcaPEMWriter(sw)) {
             w.writeObject(object);
-        } finally {
-            w.close();
         }
         return sw.toString();
     }
@@ -467,28 +461,6 @@ public final class PEMEncodable {
             buf.append(hex, i, 2);
         }
         return buf.toString();
-    }
-
-    /**
-     * Encodes a {@link byte[]} in base 64 string
-     * 
-     * @param data to be encoded
-     * @return base 64 formatted string
-     */
-    @Nonnull
-    private static String encodeBase64(@Nonnull byte[] data) {
-        return new String(Base64.encode(data), StandardCharsets.UTF_8);
-    }
-
-    /**
-     * Decodes a base 64 string into a {@link byte[]}
-     * 
-     * @param data to be decoded
-     * @return decoded data
-     */
-    @Nonnull
-    private static byte[] decodeBase64(@Nonnull String data) {
-        return Base64.decode(data);
     }
 
     private static final Logger LOGGER = Logger.getLogger(PEMEncodable.class.getName());

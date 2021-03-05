@@ -2,7 +2,7 @@
 <!--
  ~ The MIT License
  ~
- ~ Copyright (c) 2016, CloudBees, Inc.
+ ~ Copyright (c) 2016-2021, CloudBees, Inc.
  ~
  ~ Permission is hereby granted, free of charge, to any person obtaining a copy
  ~ of this software and associated documentation files (the "Software"), to deal
@@ -29,7 +29,7 @@
   <parent>
     <groupId>org.jenkins-ci.plugins</groupId>
     <artifactId>plugin</artifactId>
-    <version>3.55</version>
+    <version>4.15</version>
   </parent>
 
   <artifactId>bouncycastle-api</artifactId>
@@ -67,7 +67,7 @@
   <properties>
     <revision>2.19</revision>
     <changelist>-SNAPSHOT</changelist>
-    <jenkins.version>2.60.3</jenkins.version>
+    <jenkins.version>2.222.4</jenkins.version>
     <java.level>8</java.level>
   </properties>
 
@@ -89,7 +89,7 @@
     <dependency>
       <groupId>org.bouncycastle</groupId>
       <artifactId>bcpkix-jdk15on</artifactId>
-      <version>1.64</version>
+      <version>1.68</version>
     </dependency>
     <dependency>
         <groupId>org.assertj</groupId>

@@ -1,7 +1,7 @@
 /*
  * The MIT License
  *
- * Copyright (c) 2016, CloudBees, Inc.
+ * Copyright (c) 2016-2021, CloudBees, Inc.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -25,6 +25,7 @@
 package jenkins.bouncycastle;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 
 import java.io.File;
 import java.io.IOException;
@@ -48,7 +49,7 @@ public class FingerPrintTest {
     public static void setUpBC() throws URISyntaxException {
         Security.addProvider(new org.bouncycastle.jce.provider.BouncyCastleProvider());
         PEM_FILE = new File(
-                EncodignDecodingTest.class.getClassLoader().getResource("private-key-fingerprint.pem").toURI());
+                EncodingDecodingTest.class.getClassLoader().getResource("private-key-fingerprint.pem").toURI());
     }
 
     @Test
@@ -58,7 +59,7 @@ public class FingerPrintTest {
 
         PEMEncodable pemCodecOnlyPublic = PEMEncodable.create(pemCodec.toPublicKey());
         assertEquals(PUBLIC_KEY_FP, pemCodecOnlyPublic.getPublicKeyFingerprint());
-        assertEquals(null, pemCodecOnlyPublic.getPrivateKeyFingerprint());
+        assertNull(pemCodecOnlyPublic.getPrivateKeyFingerprint());
     }
 
     @Test
@@ -68,7 +69,7 @@ public class FingerPrintTest {
 
         PEMEncodable pemCodecOnlyPrivate = PEMEncodable.create(pemCodec.toPrivateKey());
         assertEquals(PRIVATE_KEY_FP, pemCodecOnlyPrivate.getPrivateKeyFingerprint());
-        assertEquals(null, pemCodecOnlyPrivate.getPublicKeyFingerprint());
+        assertNull(pemCodecOnlyPrivate.getPublicKeyFingerprint());
     }
 
     @Test(expected = NoSuchAlgorithmException.class)
