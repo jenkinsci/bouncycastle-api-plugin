@@ -24,6 +24,8 @@
 
 package jenkins.bouncycastle;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.contentOf;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
@@ -120,7 +122,7 @@ public class EncodignDecodingTest {
         pemEncOnlyPrivate.write(onlyPrivate);
         assertEquals(true, Arrays.equals(pemEncOnlyPrivate.toPrivateKey().getEncoded(),
                 pemEnc.toPrivateKey().getEncoded()));
-        assertEquals(FileUtils.readFileToString(PRIVATE_KEY_PEM), FileUtils.readFileToString(onlyPrivate));
+        assertThat(contentOf(onlyPrivate)).isEqualToNormalizingNewlines(contentOf(PRIVATE_KEY_PEM));
     }
 
     @Test
@@ -184,7 +186,7 @@ public class EncodignDecodingTest {
         PEMEncodable pemEnc = PEMEncodable.read(PUBLIC_KEY_PEM);
         pemEnc.write(pemFileNew);
 
-        assertEquals(FileUtils.readFileToString(PUBLIC_KEY_PEM), FileUtils.readFileToString(pemFileNew));
+        assertThat(contentOf(pemFileNew)).isEqualToNormalizingNewlines(contentOf(PUBLIC_KEY_PEM));
     }
 
     @Test
@@ -194,7 +196,7 @@ public class EncodignDecodingTest {
         PEMEncodable pemEnc = PEMEncodable.read(PRIVATE_KEY_PEM);
         pemEnc.write(pemFileNew);
 
-        assertEquals(FileUtils.readFileToString(PRIVATE_KEY_PEM), FileUtils.readFileToString(pemFileNew));
+        assertThat(contentOf(pemFileNew)).isEqualToNormalizingNewlines(contentOf(PRIVATE_KEY_PEM));
     }
 
     @Test
@@ -204,7 +206,7 @@ public class EncodignDecodingTest {
         PEMEncodable pemEnc = PEMEncodable.read(CERTIFICATE_PW_PEM);
         pemEnc.write(pemFileNew);
 
-        assertEquals(FileUtils.readFileToString(CERTIFICATE_PW_PEM), FileUtils.readFileToString(pemFileNew));
+        assertThat(contentOf(pemFileNew)).isEqualToNormalizingNewlines(contentOf(CERTIFICATE_PW_PEM));
     }
 
     @Test
@@ -214,7 +216,7 @@ public class EncodignDecodingTest {
         PEMEncodable pemEnc = PEMEncodable.read(PUBLIC_KEY_PEM);
         PEMEncodable.create(pemEnc.toPublicKey()).write(pemFileNew);
 
-        assertEquals(FileUtils.readFileToString(PUBLIC_KEY_PEM), FileUtils.readFileToString(pemFileNew));
+        assertThat(contentOf(pemFileNew)).isEqualToNormalizingNewlines(contentOf(PUBLIC_KEY_PEM));
     }
 
     @Test
@@ -224,7 +226,7 @@ public class EncodignDecodingTest {
         PEMEncodable pemEnc = PEMEncodable.read(PRIVATE_KEY_PEM);
         PEMEncodable.create(pemEnc.toKeyPair()).write(pemFileNew);
 
-        assertEquals(FileUtils.readFileToString(PRIVATE_KEY_PEM), FileUtils.readFileToString(pemFileNew));
+        assertThat(contentOf(pemFileNew)).isEqualToNormalizingNewlines(contentOf(PRIVATE_KEY_PEM));
     }
     
     
