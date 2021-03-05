@@ -36,7 +36,7 @@ class BcProviderRegistration {
     static void register(boolean prioritize) {
         if (prioritize) {
             // insert at 2nd position, following recommendation to not change the first provider:
-            // http://www.bouncycastle.org/wiki/display/JA1/Provider+Installation
+            // https://github.com/bcgit/bc-java/wiki/Provider-Installation
             Security.insertProviderAt(new BouncyCastleProvider(), 2);
         } else {
             Security.addProvider(new BouncyCastleProvider());
