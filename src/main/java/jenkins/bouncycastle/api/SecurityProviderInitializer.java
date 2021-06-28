@@ -30,6 +30,8 @@ import org.kohsuke.accmod.Restricted;
 import org.kohsuke.accmod.restrictions.NoExternalUse;
 
 import hudson.Plugin;
+import hudson.util.AdministrativeError;
+import jenkins.model.Jenkins;
 
 /**
  * Initialization class to register Bouncy Castle as a security provider.
@@ -46,8 +48,16 @@ public class SecurityProviderInitializer extends Plugin {
          * and failing because of BC not being registered. It seems to be a core related bug that is not 
          * resolving the dependency graph correctly.
          */
-
-        addSecurityProvider();
+        try {
+            addSecurityProvider();
+        } catch (Throwable t) {
+            new AdministrativeError("bouncycastle.provider.install", 
+                                    "Failed to install (non FIPS) BouncyCastle provider" , 
+                                    "The registration of the non FIPS bouncycastle provider did not complete.  " +
+                                           "If the BOuncyCastle FIPS provider is installed this is by design and can be ignored.  "+
+                                           "This failure may cause connection issues with hosts using encryption methods that are not FIPS compliant or not provided by the JVM.", 
+                                    t);
+        }
     }
     
     /**
