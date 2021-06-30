@@ -47,7 +47,7 @@ public class FingerPrintTest {
 
     @BeforeClass
     public static void setUpBC() throws URISyntaxException {
-        Security.addProvider(new org.bouncycastle.jce.provider.BouncyCastleProvider());
+        Security.addProvider(new org.bouncycastle.jcajce.provider.BouncyCastleFipsProvider());
         PEM_FILE = new File(
                 EncodingDecodingTest.class.getClassLoader().getResource("private-key-fingerprint.pem").toURI());
     }

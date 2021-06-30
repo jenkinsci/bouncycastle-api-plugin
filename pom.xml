@@ -88,8 +88,17 @@
   <dependencies>
     <dependency>
       <groupId>org.bouncycastle</groupId>
-      <artifactId>bcpkix-jdk15on</artifactId>
-      <version>1.68</version>
+      <artifactId>bc-fips</artifactId>
+      <version>1.0.2.1</version>
+      <scope>provided</scope>
+      <optional>true</optional>
+    </dependency>
+    <dependency>
+      <groupId>org.bouncycastle</groupId>
+      <artifactId>bcpkix-fips</artifactId>
+      <version>1.0.5</version>
+      <scope>provided</scope>
+      <optional>true</optional>
     </dependency>
     <dependency>
         <groupId>org.assertj</groupId>
@@ -99,17 +108,4 @@
     </dependency>
   </dependencies>
   
-  <build>
-    <pluginManagement>
-      <plugins>
-        <plugin>
-          <groupId>org.jenkins-ci.tools</groupId>
-          <artifactId>maven-hpi-plugin</artifactId>
-          <configuration>
-            <maskClasses>org.bouncycastle</maskClasses>
-          </configuration>
-        </plugin>
-      </plugins>
-    </pluginManagement>
-  </build>
 </project>

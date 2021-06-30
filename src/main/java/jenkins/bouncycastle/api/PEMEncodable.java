@@ -153,7 +153,7 @@ public final class PEMEncodable {
                 throw new IOException("Could not parse PEM, only key pairs, private keys, public keys and certificates are supported");
             }
 
-            JcaPEMKeyConverter kConv = new JcaPEMKeyConverter().setProvider("BC");
+            JcaPEMKeyConverter kConv = new JcaPEMKeyConverter();//.setProvider("BC");
 
             // handle supported PEM formats.
             if (object instanceof PEMEncryptedKeyPair) {
@@ -190,7 +190,7 @@ public final class PEMEncodable {
             } else if (object instanceof SubjectPublicKeyInfo) {
                 return new PEMEncodable(kConv.getPublicKey((SubjectPublicKeyInfo) object));
             } else if (object instanceof X509CertificateHolder) {
-                JcaX509CertificateConverter cConv = new JcaX509CertificateConverter().setProvider("BC");
+                JcaX509CertificateConverter cConv = new JcaX509CertificateConverter();//.setProvider("BC");
                 return new PEMEncodable(cConv.getCertificate((X509CertificateHolder) object));
             } else {
                 throw new IOException(
