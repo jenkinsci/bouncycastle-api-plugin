@@ -31,6 +31,7 @@ import java.io.IOException;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
+import java.util.logging.Logger;
 import javax.annotation.Nonnull;
 
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
@@ -46,6 +47,7 @@ import jenkins.security.MasterToSlaveCallable;
  */
 public class InstallBouncyCastleJCAProvider extends MasterToSlaveCallable<Boolean, Exception> {
 
+    private static Logger LOG = Logger.getLogger(InstallBouncyCastleJCAProvider.class.getName());
     /**
      * Ensure standardized serialization.
      */
@@ -105,6 +107,9 @@ public class InstallBouncyCastleJCAProvider extends MasterToSlaveCallable<Boolea
      * @throws LinkageError if there was a classloading issue on the remote agent.
      */
     public static void on(@Nonnull Channel channel) throws IOException, InterruptedException {
+        if (!BouncyCastlePlugin.isActive()) {
+            return;
+        }
         Future future = channel.getProperty(BOUNCYCASTLE_REGISTERED);
 
         try {
