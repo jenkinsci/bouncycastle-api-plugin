@@ -131,42 +131,21 @@
     </dependency>
   </dependencies>
 
-  <!--  copy the BC jars to bc_jars in the plugins resources, and exclude them from WEB-INF/lib -->
   <build>
     <plugins>
       <plugin>
         <artifactId>maven-dependency-plugin</artifactId>
         <executions>
           <execution>
+            <!--  copy the bouncycastle jars so they will be in the java archive -->
             <id>copy-bc-jars</id>
             <goals>
               <goal>copy-dependencies</goal>
             </goals>
             <configuration>
-              <!--  there is no easy way to filter here, so do crude pass and then do the correct filter with build-helper-maven-plugin -->
+              <includeGroupIds>org.bouncycastle</includeGroupIds>
               <excludeTransitive>true</excludeTransitive>
-            </configuration>
-          </execution>
-        </executions>
-      </plugin>
-      <plugin>
-        <groupId>org.codehaus.mojo</groupId>
-        <artifactId>build-helper-maven-plugin</artifactId>
-        <executions>
-          <execution>
-            <id>add-bc-jars</id>
-            <goals>
-              <goal>add-resource</goal>
-            </goals>
-            <configuration>
-              <resources>
-                <resource>
-                  <directory>${project.build.directory}/dependency</directory>
-                  <targetPath>bc_jars</targetPath>
-                  <filtering>false</filtering>
-                  <include>bc*.jar</include>
-                </resource>
-              </resources>
+              <outputDirectory>${project.build.directory}/extra-classes/WEB-INF/optional-lib/</outputDirectory>
             </configuration>
           </execution>
         </executions>
@@ -177,6 +156,8 @@
         <configuration>
           <!-- do not add bouncycastle jars to WEB-INF/lib as they get added dynamically to be compatible with bouncycastle fips-->
           <warSourceExcludes>WEB-INF/lib/bc*.jar</warSourceExcludes>
+          <!-- and add them back in but in so they are in WEB-INF/optional-lib/ so we can load them dynamically -->
+          <webappDirectory>${project.build.directory}/extra-classes/</webappDirectory>
         </configuration>
       </plugin>
     </plugins>

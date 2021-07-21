@@ -1,23 +1,17 @@
 package jenkins.bouncycastle.api;
 
-import java.io.BufferedReader;
 import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.net.URISyntaxException;
-import java.net.URL;
-import java.nio.charset.Charset;
 import java.security.Provider;
 import java.security.Security;
-import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import java.util.stream.Collectors;
 import org.kohsuke.accmod.Restricted;
 import org.kohsuke.accmod.restrictions.NoExternalUse;
 import org.kohsuke.accmod.restrictions.suppressions.SuppressRestrictedWarnings;
+import hudson.Main;
 import hudson.Plugin;
+import hudson.PluginWrapper;
+import jenkins.model.Jenkins;
 import jenkins.util.AntClassLoader;
 
 @SuppressWarnings("deprecation") // there is no other way to achieve this at the correct lifecycle point
@@ -51,14 +45,26 @@ public class BouncyCastlePlugin extends Plugin {
          * Whilst plugins that have code may go boom before this with class loading issues, extensions (at this point)
          * have not been discovered, so this would only affect people using the deprecated `Plugin` class (like we are!)
          */
-        final List<String> bcJars = getResourceFiles();
-        AntClassLoader cl = (AntClassLoader) this.getWrapper().classLoader;
 
-        // grab the needed resources
-        for (String jar : bcJars) {
-            File jarFile = locateJar(jar);
-            LOG.log(Level.INFO, () -> "Inserting " + jar + " into bouncycastle-api plugin classpath");
-            cl.addPathComponent(jarFile);
+        final File optionalLibDir = getOptionalLibDirectory();
+        File[] optionalLibs = optionalLibDir.listFiles();
+
+        if (optionalLibs == null || optionalLibs.length == 0) {
+            if (Main.isUnitTest) {
+                LOG.log(Level.INFO, "No optional-libs found, for non RealJenkinsRule this is fine and can be ignored.");
+            } else {
+                LOG.log(Level.WARNING, "No optional-libs not found at {0}, BouncyCastle APIs will be unavailable causing strange runtime issues.", optionalLibDir);
+                // TODO do we want to do this or continue in a best effort?
+                throw new IllegalStateException("BouncyCastle libs are missing from WEB-INF/optional-libs");
+            }
+        } else {
+            //final List<String> bcJars = getResourceFiles();
+            AntClassLoader cl = (AntClassLoader) this.getWrapper().classLoader;
+
+            for (File optionalLib : optionalLibs) {
+                LOG.log(Level.INFO, () -> "Inserting " + optionalLib + " into bouncycastle-api plugin classpath");
+                cl.addPathComponent(optionalLib);
+            }
         }
         SecurityProviderInitializer.addSecurityProvider();
     }
@@ -67,30 +73,17 @@ public class BouncyCastlePlugin extends Plugin {
         return isActive;
     }
 
-    private static File locateJar(String name) throws IOException {
-        LOG.log(Level.FINE, "Attempting to locate BouncyCastle Jar {0}", name);
-        URL resourceURL = BouncyCastlePlugin.class.getResource("/bc_jars/" + name);
-        if (resourceURL == null) {
-            throw new IOException("Could not locate " + name + " in plugin resources");
-        }
-        try {
-            File f = new File(resourceURL.toURI());
-            LOG.log(Level.FINE, () -> "Located " + name + "  at " + f.getAbsolutePath());
-            return f;
-        } catch (URISyntaxException ex) {
-            throw new IOException("Could not locate file for " + name + " with URI " + resourceURL, ex);
-        }
-    }
 
-    private static List<String> getResourceFiles() throws IOException {
-        LOG.log(Level.FINE, "Searching for BouncyCastle Jars...");
-
-        try (InputStream in = BouncyCastlePlugin.class.getResourceAsStream("/bc_jars");
-                InputStreamReader isr = new InputStreamReader(in, Charset.defaultCharset());
-                BufferedReader br = new BufferedReader(isr)) {
-            List<String> filenames = br.lines().collect(Collectors.toList());
-            LOG.log(Level.FINE, () -> "Found the following BouncyCastle Jars: " + filenames.toString());
-            return filenames;
+    private final File getOptionalLibDirectory() {
+        PluginWrapper pw = getWrapper();
+        File explodedPluginsDir = pw.parent.getWorkDir();
+        if (explodedPluginsDir == null) {
+            // not overridden use default of ${JENKINS_HOME}/plugins
+            explodedPluginsDir = new File(Jenkins.get().getRootDir(), "plugins");
+            LOG.log(Level.FINE, "plugindir not specified, falling back to $'{'JENKINS_HOME/plugins'}' as {0}", explodedPluginsDir);
         }
+        File f =  new File(explodedPluginsDir, pw.getShortName() + "/WEB-INF/optional-lib/");
+        LOG.log(Level.FINE, "using {0} as the optional-lib directory", f);
+        return f;
     }
 }
