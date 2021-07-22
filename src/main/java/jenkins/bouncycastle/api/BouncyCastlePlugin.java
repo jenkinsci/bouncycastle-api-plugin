@@ -27,9 +27,9 @@ public class BouncyCastlePlugin extends Plugin {
         Provider p = Security.getProvider("BCFIPS");
         isActive = (p == null);
 
-        LOG.log(Level.INFO,
+        LOG.log(Level.CONFIG,
                 isActive ? "BouncyCastle Providers from BouncyCastle API plugin will be active" :
-                           "Detected the precence of the BouncyCastle FIPS provider, the regular BouncyCastle jars will not be avaialble.");
+                           "Detected the presence of the BouncyCastle FIPS provider, the regular BouncyCastle JARs will not be available.");
     }
 
     @Override
