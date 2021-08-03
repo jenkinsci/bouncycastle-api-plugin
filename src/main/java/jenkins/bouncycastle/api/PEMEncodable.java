@@ -211,7 +211,7 @@ public final class PEMEncodable {
             } else if (object instanceof SubjectPublicKeyInfo) {
                 return new PEMEncodable(kConv.getPublicKey((SubjectPublicKeyInfo) object));
             } else if (object instanceof X509CertificateHolder) {
-                JcaX509CertificateConverter cConv = new JcaX509CertificateConverter().setProvider(BOUNCY_CASTLE_PROVIDER.getName());
+            JcaX509CertificateConverter cConv = new JcaX509CertificateConverter().setProvider(BOUNCY_CASTLE_PROVIDER);
                 return new PEMEncodable(cConv.getCertificate((X509CertificateHolder) object));
             } else {
                 throw new IOException(
