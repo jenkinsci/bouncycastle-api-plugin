@@ -174,7 +174,7 @@ public final class PEMEncodable {
                 throw new IOException("Could not parse PEM, only key pairs, private keys, public keys and certificates are supported");
             }
 
-            JcaPEMKeyConverter kConv = new JcaPEMKeyConverter().setProvider(BOUNCY_CASTLE_PROVIDER.getName());
+            JcaPEMKeyConverter kConv = new JcaPEMKeyConverter().setProvider(BOUNCY_CASTLE_PROVIDER);
 
             // handle supported PEM formats.
             if (object instanceof PEMEncryptedKeyPair) {
