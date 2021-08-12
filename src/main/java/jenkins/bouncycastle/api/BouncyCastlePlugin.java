@@ -54,15 +54,14 @@ public class BouncyCastlePlugin extends Plugin {
                 LOG.log(Level.INFO, "No optional-libs found, for non RealJenkinsRule this is fine and can be ignored.");
             } else {
                 LOG.log(Level.WARNING, "No optional-libs not found at {0}, BouncyCastle APIs will be unavailable causing strange runtime issues.", optionalLibDir);
-                // TODO do we want to do this or continue in a best effort?
+                // fail fast, most likely a packaging issue
                 throw new IllegalStateException("BouncyCastle libs are missing from WEB-INF/optional-libs");
             }
         } else {
-            //final List<String> bcJars = getResourceFiles();
             AntClassLoader cl = (AntClassLoader) this.getWrapper().classLoader;
 
             for (File optionalLib : optionalLibs) {
-                LOG.log(Level.INFO, () -> "Inserting " + optionalLib + " into bouncycastle-api plugin classpath");
+                LOG.log(Level.CONFIG, () -> "Inserting " + optionalLib + " into bouncycastle-api plugin classpath");
                 cl.addPathComponent(optionalLib);
             }
         }

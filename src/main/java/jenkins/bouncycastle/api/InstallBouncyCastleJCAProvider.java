@@ -31,7 +31,6 @@ import java.io.IOException;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
-import java.util.logging.Logger;
 import javax.annotation.Nonnull;
 
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
@@ -47,7 +46,6 @@ import jenkins.security.MasterToSlaveCallable;
  */
 public class InstallBouncyCastleJCAProvider extends MasterToSlaveCallable<Boolean, Exception> {
 
-    private static Logger LOG = Logger.getLogger(InstallBouncyCastleJCAProvider.class.getName());
     /**
      * Ensure standardized serialization.
      */
