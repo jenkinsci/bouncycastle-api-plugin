@@ -56,15 +56,19 @@ import java.security.KeyPair;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
+import java.security.Provider;
 import java.security.PublicKey;
+import java.security.Security;
 import java.security.UnrecoverableKeyException;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
 import java.security.interfaces.RSAPrivateCrtKey;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.RSAPublicKeySpec;
+import java.util.Arrays;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
 
 /**
  * A class that provides an API to manage PEM format, providing additional methods to handle Keys, Certificates,
@@ -79,6 +83,23 @@ public final class PEMEncodable {
      */
     @Nonnull
     private final Object object;
+
+    private static final Provider BOUNCY_CASTLE_PROVIDER;
+
+    static {
+        // prefer the FIPS provider if available
+        Provider provider = Security.getProvider("BCFIPS");
+        if (provider == null) {
+            provider = Security.getProvider("BC");
+        }
+        if (provider == null) {
+           throw new IllegalStateException(Arrays.asList(Security.getProviders()).stream().map(p -> p.getName())
+                   .collect(Collectors.joining(",",
+                     "Couldn't locate either of bouncy castle FIPS or non fips provider, available providers are",
+                     ".")));
+        }
+        BOUNCY_CASTLE_PROVIDER = provider;
+    }
 
     private PEMEncodable(@Nonnull Object pemObject) {
         this.object = pemObject;
@@ -153,7 +174,7 @@ public final class PEMEncodable {
                 throw new IOException("Could not parse PEM, only key pairs, private keys, public keys and certificates are supported");
             }
 
-            JcaPEMKeyConverter kConv = new JcaPEMKeyConverter().setProvider("BC");
+            JcaPEMKeyConverter kConv = new JcaPEMKeyConverter().setProvider(BOUNCY_CASTLE_PROVIDER);
 
             // handle supported PEM formats.
             if (object instanceof PEMEncryptedKeyPair) {
@@ -190,7 +211,7 @@ public final class PEMEncodable {
             } else if (object instanceof SubjectPublicKeyInfo) {
                 return new PEMEncodable(kConv.getPublicKey((SubjectPublicKeyInfo) object));
             } else if (object instanceof X509CertificateHolder) {
-                JcaX509CertificateConverter cConv = new JcaX509CertificateConverter().setProvider("BC");
+                JcaX509CertificateConverter cConv = new JcaX509CertificateConverter().setProvider(BOUNCY_CASTLE_PROVIDER);
                 return new PEMEncodable(cConv.getCertificate((X509CertificateHolder) object));
             } else {
                 throw new IOException(

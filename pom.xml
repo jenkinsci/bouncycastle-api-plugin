@@ -87,6 +87,14 @@
   </pluginRepositories>
 
   <dependencies>
+    <!--
+      The BouncyCastle jars are exposed as regular dependencies to other plugins who depend on this plugin on the build classpath.
+      The JARs are not added to the plugin in the normal way though, rather they are conditionally injected into the classpath at initialisation time.
+      This allows plugin compilation etc to work as normal, however if the JVM has been configured using BouncyCastle FIPS jars for FIPS compliance we will not inject 
+      incompatible classes or try to register a non fips compliant Provider.
+      The FIPS and non FIPS versions of BouncyCastle are mostly but not completely API compatible if the consumer steers clear of any deprecated APIs or low level APIS.
+      This may cause some plugins that depend on this to blow up at runtime (e.g SAML), but without this even more things would go bang.
+    -->
     <dependency>
       <groupId>org.bouncycastle</groupId>
       <artifactId>bcpkix-jdk15on</artifactId>
@@ -108,5 +116,50 @@
         <version>3.19.0</version>
         <scope>test</scope>
     </dependency>
+    <dependency>
+      <groupId>org.kohsuke</groupId>
+      <artifactId>access-modifier-suppressions</artifactId>
+      <version>${access-modifier-checker.version}</version>
+      <scope>provided</scope> <!-- not needed at runtime -->
+      <exclusions>
+        <exclusion>
+          <!-- Upper bounds and comes from core -->
+          <groupId>org.kohsuke</groupId>
+          <artifactId>access-modifier-annotation</artifactId>
+        </exclusion>
+      </exclusions>
+    </dependency>
   </dependencies>
+
+  <build>
+    <plugins>
+      <plugin>
+        <artifactId>maven-dependency-plugin</artifactId>
+        <executions>
+          <execution>
+            <!--  copy the bouncycastle jars so they will be in the java archive -->
+            <id>copy-bc-jars</id>
+            <goals>
+              <goal>copy-dependencies</goal>
+            </goals>
+            <configuration>
+              <includeGroupIds>org.bouncycastle</includeGroupIds>
+              <excludeTransitive>true</excludeTransitive>
+              <outputDirectory>${project.build.directory}/extra-classes/WEB-INF/optional-lib/</outputDirectory>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+      <plugin>
+        <groupId>org.jenkins-ci.tools</groupId>
+        <artifactId>maven-hpi-plugin</artifactId>
+        <configuration>
+          <!-- do not add bouncycastle jars to WEB-INF/lib as they get added dynamically to be compatible with bouncycastle fips-->
+          <warSourceExcludes>WEB-INF/lib/bc*.jar</warSourceExcludes>
+          <!-- and add them back in but in so they are in WEB-INF/optional-lib/ so we can load them dynamically -->
+          <webappDirectory>${project.build.directory}/extra-classes/</webappDirectory>
+        </configuration>
+      </plugin>
+    </plugins>
+  </build>
 </project>

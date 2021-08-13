@@ -29,36 +29,23 @@ import java.util.logging.Logger;
 import org.kohsuke.accmod.Restricted;
 import org.kohsuke.accmod.restrictions.NoExternalUse;
 
-import hudson.Plugin;
-
 /**
  * Initialization class to register Bouncy Castle as a security provider.
  * 
  * @since 1.0
  */
-public class SecurityProviderInitializer extends Plugin {
-   
-    private static final Logger LOGGER = Logger.getLogger(SecurityProviderInitializer.class.getName());
-    
-    static{
-        /*
-         * FIXME: We should do it with the @Initializer but some other plugins are loading before this one 
-         * and failing because of BC not being registered. It seems to be a core related bug that is not 
-         * resolving the dependency graph correctly.
-         */
+public class SecurityProviderInitializer {
 
-        addSecurityProvider();
-    }
-    
+    private static final Logger LOGGER = Logger.getLogger(SecurityProviderInitializer.class.getName());
+
     /**
      * Initializes JVM security to Bouncy Castle. This initialization should be done before any plugin is loaded in
      * order to ensure that the provider is available to any plugin that needs it and that we are the first to register
      * it.
      * 
      */
-    //@Initializer(before = InitMilestone.STARTED)
     @Restricted(NoExternalUse.class)
-    public static void addSecurityProvider() {
+    static void addSecurityProvider() {
         LOGGER.fine("Initializing Bouncy Castle security provider.");
         BcProviderRegistration.register();
         LOGGER.fine("Bouncy Castle security provider initialized.");

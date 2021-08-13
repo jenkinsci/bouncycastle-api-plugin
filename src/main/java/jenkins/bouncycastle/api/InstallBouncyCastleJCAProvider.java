@@ -105,6 +105,9 @@ public class InstallBouncyCastleJCAProvider extends MasterToSlaveCallable<Boolea
      * @throws LinkageError if there was a classloading issue on the remote agent.
      */
     public static void on(@Nonnull Channel channel) throws IOException, InterruptedException {
+        if (!BouncyCastlePlugin.isActive()) {
+            return;
+        }
         Future future = channel.getProperty(BOUNCYCASTLE_REGISTERED);
 
         try {
