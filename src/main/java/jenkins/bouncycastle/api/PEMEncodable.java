@@ -183,7 +183,7 @@ public final class PEMEncodable {
                     PEMEncryptedKeyPair ekp = (PEMEncryptedKeyPair) object;
                     return new PEMEncodable(kConv.getKeyPair(ekp.decryptKeyPair(dp)));
                 } else {
-                    throw new UnrecoverableKeyException();
+                    throw new UnrecoverableKeyException("Key is passphrase protected, but no passphrase was provided");
                 }
             } else if (object instanceof PKCS8EncryptedPrivateKeyInfo) {
                 if (passphrase != null) {
@@ -191,7 +191,7 @@ public final class PEMEncodable {
                     PKCS8EncryptedPrivateKeyInfo epk = (PKCS8EncryptedPrivateKeyInfo) object;
                     return new PEMEncodable(kConv.getPrivateKey(epk.decryptPrivateKeyInfo(dp)));
                 } else {
-                    throw new UnrecoverableKeyException();
+                    throw new UnrecoverableKeyException("Key is passphrase protected, but no passphrase was provided");
                 }
             } else if (object instanceof PEMKeyPair) {
                 return new PEMEncodable(kConv.getKeyPair((PEMKeyPair) object));
