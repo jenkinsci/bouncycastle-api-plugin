@@ -72,6 +72,7 @@ public class InstallBouncyCastleJCAProvider extends MasterToSlaveCallable<Boolea
     /**
      * {@inheritDoc}
      */
+    @Override
     @Nonnull
     public Boolean call() throws Exception {
         BcProviderRegistration.register(prioritize);

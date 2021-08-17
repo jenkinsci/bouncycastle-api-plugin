@@ -41,7 +41,9 @@ import java.security.cert.Certificate;
 import java.util.Arrays;
 
 import org.apache.commons.io.FileUtils;
+import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.util.encoders.Base64;
+import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Rule;
 import org.junit.Test;
@@ -54,7 +56,12 @@ public class EncodingDecodingTest {
 
     @BeforeClass
     public static void setUpBC() {
-        Security.addProvider(new org.bouncycastle.jce.provider.BouncyCastleProvider());
+        Security.addProvider(new BouncyCastleProvider());
+    }
+
+    @AfterClass
+    public static void cleanupProvider() {
+        Security.removeProvider(BouncyCastleProvider.PROVIDER_NAME);
     }
 
     private static final String PUBLIC_KEY = "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAss5HtiSf5uuHsCNwTr2vqjFgZFnAKvZ8akFNvstouA6h3oshssI4xFOWcVOAQu6u7ZNLwldwMYo1oGbvwIoSkt7L1JTgliAkXbSTdeQjbL80Tk+jGd8+gEPqcUhqCSr/GBPA/OoNkWvTR0cv1Tlna/OcLoOb+AvoYrj+wz/N8qFGOOco5eHVYEgy/YJUX//DIyS8JV9EE/3327j+VRgvDJKewc/y5iHqPMxEabexbmESuwOnEKQ7BLr0RA/8ZIIZtSFP2Eeq1rd1sXK9d3DW9i6hwiQki+NSskFfqpig2fkDVnPkPcMBTkqgV8whKp+A088yYXIowAPIs/cLU5T3bwIDAQAB";
@@ -244,6 +251,6 @@ public class EncodingDecodingTest {
     @Test(expected = IOException.class)
     @Issue(value = "JENKINS-41978")
     public void testInvalidPEM() throws Exception {
-        PEMEncodable.decode(FileUtils.readFileToString(getResourceFile("invalid.pem")));
+        PEMEncodable.decode(FileUtils.readFileToString(getResourceFile("invalid.pem"), StandardCharsets.UTF_8));
     }
 }

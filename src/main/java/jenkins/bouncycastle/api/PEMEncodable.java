@@ -50,6 +50,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.StringReader;
 import java.io.StringWriter;
+import java.nio.charset.StandardCharsets;
 import java.security.Key;
 import java.security.KeyFactory;
 import java.security.KeyPair;
@@ -183,7 +184,7 @@ public final class PEMEncodable {
                     PEMEncryptedKeyPair ekp = (PEMEncryptedKeyPair) object;
                     return new PEMEncodable(kConv.getKeyPair(ekp.decryptKeyPair(dp)));
                 } else {
-                    throw new UnrecoverableKeyException();
+                    throw new UnrecoverableKeyException("Key is passphrase protected, but no passphrase was provided");
                 }
             } else if (object instanceof PKCS8EncryptedPrivateKeyInfo) {
                 if (passphrase != null) {
@@ -191,7 +192,7 @@ public final class PEMEncodable {
                     PKCS8EncryptedPrivateKeyInfo epk = (PKCS8EncryptedPrivateKeyInfo) object;
                     return new PEMEncodable(kConv.getPrivateKey(epk.decryptPrivateKeyInfo(dp)));
                 } else {
-                    throw new UnrecoverableKeyException();
+                    throw new UnrecoverableKeyException("Key is passphrase protected, but no passphrase was provided");
                 }
             } else if (object instanceof PEMKeyPair) {
                 return new PEMEncodable(kConv.getKeyPair((PEMKeyPair) object));
@@ -273,7 +274,7 @@ public final class PEMEncodable {
     @Nonnull
     public static PEMEncodable read(@Nonnull File pemFile, @Nullable char[] passphrase)
             throws IOException, UnrecoverableKeyException {
-        return decode(FileUtils.readFileToString(pemFile), passphrase);
+        return decode(FileUtils.readFileToString(pemFile, StandardCharsets.UTF_8), passphrase);
     }
 
     /**
@@ -284,7 +285,7 @@ public final class PEMEncodable {
      * @throws IOException launched if a problem exists generating the PEM information or writing the {@link File}
      */
     public void write(@Nonnull File pemFile) throws IOException {
-        FileUtils.writeStringToFile(pemFile, encode());
+        FileUtils.writeStringToFile(pemFile, encode(), StandardCharsets.UTF_8);
     }
 
     /**
