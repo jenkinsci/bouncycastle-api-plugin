@@ -33,7 +33,8 @@ import java.net.URISyntaxException;
 import java.security.NoSuchAlgorithmException;
 import java.security.Security;
 import java.security.UnrecoverableKeyException;
-
+import org.bouncycastle.jce.provider.BouncyCastleProvider;
+import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
@@ -47,10 +48,16 @@ public class FingerPrintTest {
 
     @BeforeClass
     public static void setUpBC() throws URISyntaxException {
-        Security.addProvider(new org.bouncycastle.jce.provider.BouncyCastleProvider());
+        Security.addProvider(new BouncyCastleProvider());
         PEM_FILE = new File(
                 EncodingDecodingTest.class.getClassLoader().getResource("private-key-fingerprint.pem").toURI());
     }
+
+    @AfterClass
+    public static void cleanupProvider() {
+        Security.removeProvider(BouncyCastleProvider.PROVIDER_NAME);
+    }
+
 
     @Test
     public void testPrivateFingerprint() throws IOException, UnrecoverableKeyException {

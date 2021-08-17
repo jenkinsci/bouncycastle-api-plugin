@@ -3,8 +3,10 @@ package jenkins.bouncycastle.api;
 import java.security.Provider;
 import java.security.Security;
 import java.util.stream.IntStream;
-
+import org.bouncycastle.jce.provider.BouncyCastleProvider;
+import org.junit.AfterClass;
 import org.junit.Assert;
+import org.junit.BeforeClass;
 import org.junit.Rule;
 import org.junit.Test;
 import org.jvnet.hudson.test.JenkinsRule;
@@ -12,8 +14,19 @@ import org.jvnet.hudson.test.JenkinsRule;
 import hudson.remoting.Channel;
 import hudson.slaves.DumbSlave;
 import jenkins.security.MasterToSlaveCallable;
+import static org.junit.Assert.assertNull;
 
 public class InstallBouncyCastleJCAProviderTest {
+
+    @BeforeClass
+    public static void validateEnv() {
+        assertNull(Security.getProvider(BouncyCastleProvider.PROVIDER_NAME));
+    }
+
+    @AfterClass
+    public static void cleanupProvider() {
+        Security.removeProvider(BouncyCastleProvider.PROVIDER_NAME);
+    }
 
     @Rule
     public JenkinsRule r = new JenkinsRule();

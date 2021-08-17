@@ -25,20 +25,32 @@
 package jenkins.bouncycastle;
 
 import static org.junit.Assert.assertNotNull;
-
+import static org.junit.Assert.assertNull;
 import java.security.Security;
-
+import org.bouncycastle.jce.provider.BouncyCastleProvider;
+import org.junit.AfterClass;
+import org.junit.BeforeClass;
 import org.junit.Rule;
 import org.junit.Test;
 import org.jvnet.hudson.test.JenkinsRule;
 
 public class SecurityProviderInitializerTest {
 
+    @BeforeClass
+    public static void validateEnv() {
+        assertNull(Security.getProvider(BouncyCastleProvider.PROVIDER_NAME));
+    }
+
+    @AfterClass
+    public static void cleanupProvider() {
+        Security.removeProvider(BouncyCastleProvider.PROVIDER_NAME);
+    }
+
     @Rule
     public JenkinsRule r = new JenkinsRule();
 
     @Test
     public void testProviderInitialized() {
-        assertNotNull(Security.getProvider("BC"));
+        assertNotNull(Security.getProvider(BouncyCastleProvider.PROVIDER_NAME));
     }
 }
