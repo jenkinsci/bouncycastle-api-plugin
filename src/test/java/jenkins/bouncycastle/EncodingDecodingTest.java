@@ -251,6 +251,6 @@ public class EncodingDecodingTest {
     @Test(expected = IOException.class)
     @Issue(value = "JENKINS-41978")
     public void testInvalidPEM() throws Exception {
-        PEMEncodable.decode(FileUtils.readFileToString(getResourceFile("invalid.pem")));
+        PEMEncodable.decode(FileUtils.readFileToString(getResourceFile("invalid.pem"), StandardCharsets.UTF_8));
     }
 }
