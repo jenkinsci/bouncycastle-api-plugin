@@ -74,6 +74,7 @@ public class EncodingDecodingTest {
     private static File CERTIFICATE_PUBLIC_KEY_PEM;
     private static File CERTIFICATE_PW_PEM;
     private static File CERTIFICATE_PUBLIC_KEY_PW_PEM;
+    private static File PRIVATE_KEY_PW_PKCS8;
 
     private static final String PRIVATE_KEY_PW = "test";
 
@@ -84,6 +85,7 @@ public class EncodingDecodingTest {
     public static void setUpClass() throws URISyntaxException {
         PRIVATE_KEY_PEM = getResourceFile("private-key.pem");
         PRIVATE_KEY_PW_PEM = getResourceFile("private-key-with-password.pem");
+        PRIVATE_KEY_PW_PKCS8 = getResourceFile("private-key-with-password.pkcs8");
         PUBLIC_KEY_PEM = getResourceFile("public-key.pem");
         CERTIFICATE_PEM = getResourceFile("test_cert_cert.pem");
         CERTIFICATE_PUBLIC_KEY_PEM = getResourceFile("test_cert_key.pem");
@@ -111,6 +113,20 @@ public class EncodingDecodingTest {
     @Test
     public void testReadPrivateKeyWithPasswordPEM() throws Exception {
         PEMEncodable pemEnc = PEMEncodable.read(PRIVATE_KEY_PW_PEM, PRIVATE_KEY_PW.toCharArray());
+
+        assertEquals(
+                new String(Base64.encode(pemEnc.toKeyPair().getPrivate().getEncoded()), StandardCharsets.UTF_8),
+                new String(Base64.encode(pemEnc.toPrivateKey().getEncoded()), StandardCharsets.UTF_8));
+        assertEquals(PUBLIC_KEY,
+                new String(Base64.encode(pemEnc.toKeyPair().getPublic().getEncoded()), StandardCharsets.UTF_8));
+        assertEquals(PUBLIC_KEY,
+                new String(Base64.encode(pemEnc.toPublicKey().getEncoded()), StandardCharsets.UTF_8));
+    }
+
+    @Test
+    @Issue(value="JENKINS-66394") 
+    public void testReadPrivateKeyWithPasswordPKCS8() throws Exception {
+        PEMEncodable pemEnc = PEMEncodable.read(PRIVATE_KEY_PW_PKCS8, "test".toCharArray());
 
         assertEquals(
                 new String(Base64.encode(pemEnc.toKeyPair().getPrivate().getEncoded()), StandardCharsets.UTF_8),

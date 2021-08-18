@@ -36,13 +36,11 @@ import org.bouncycastle.openssl.PEMKeyPair;
 import org.bouncycastle.openssl.PEMParser;
 import org.bouncycastle.openssl.jcajce.JcaPEMKeyConverter;
 import org.bouncycastle.openssl.jcajce.JcaPEMWriter;
-import org.bouncycastle.openssl.jcajce.JceOpenSSLPKCS8DecryptorProviderBuilder;
 import org.bouncycastle.openssl.jcajce.JcePEMDecryptorProviderBuilder;
 import org.bouncycastle.operator.InputDecryptorProvider;
-import org.bouncycastle.operator.OperatorCreationException;
 import org.bouncycastle.pkcs.PKCS8EncryptedPrivateKeyInfo;
 import org.bouncycastle.pkcs.PKCSException;
-
+import org.bouncycastle.pkcs.jcajce.JcePKCSPBEInputDecryptorProviderBuilder;
 import javax.annotation.CheckForNull;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -188,9 +186,10 @@ public final class PEMEncodable {
                 }
             } else if (object instanceof PKCS8EncryptedPrivateKeyInfo) {
                 if (passphrase != null) {
-                    InputDecryptorProvider dp = new JceOpenSSLPKCS8DecryptorProviderBuilder().build(passphrase);
+                    InputDecryptorProvider dp = new JcePKCSPBEInputDecryptorProviderBuilder().setProvider(BOUNCY_CASTLE_PROVIDER).build(passphrase);
                     PKCS8EncryptedPrivateKeyInfo epk = (PKCS8EncryptedPrivateKeyInfo) object;
-                    return new PEMEncodable(kConv.getPrivateKey(epk.decryptPrivateKeyInfo(dp)));
+                    PrivateKey pk = kConv.getPrivateKey(epk.decryptPrivateKeyInfo(dp));
+                    return getPEMEncodableKeyPairFromPrivateKey(pk);
                 } else {
                     throw new UnrecoverableKeyException("Key is passphrase protected, but no passphrase was provided");
                 }
@@ -198,17 +197,7 @@ public final class PEMEncodable {
                 return new PEMEncodable(kConv.getKeyPair((PEMKeyPair) object));
             } else if (object instanceof PrivateKeyInfo) {
                 PrivateKey pk = kConv.getPrivateKey((PrivateKeyInfo) object);
-
-                // JENKINS-35661 in this case we know how to get the public key too
-                if (pk instanceof RSAPrivateCrtKey) {
-                    // obtain public key spec from the private key
-                    RSAPrivateCrtKey rsaPK = (RSAPrivateCrtKey) pk;
-                    RSAPublicKeySpec pubKeySpec = new RSAPublicKeySpec(rsaPK.getModulus(), rsaPK.getPublicExponent());
-                    KeyFactory kf = KeyFactory.getInstance("RSA");
-                    return new PEMEncodable(new KeyPair(kf.generatePublic(pubKeySpec), rsaPK));
-                }
-
-                return new PEMEncodable(pk);
+                return getPEMEncodableKeyPairFromPrivateKey(pk);
             } else if (object instanceof SubjectPublicKeyInfo) {
                 return new PEMEncodable(kConv.getPublicKey((SubjectPublicKeyInfo) object));
             } else if (object instanceof X509CertificateHolder) {
@@ -219,8 +208,6 @@ public final class PEMEncodable {
                         "Could not parse PEM, only key pairs, private keys, public keys and certificates are supported. Received "
                                 + object.getClass().getName());
             }
-        } catch (OperatorCreationException e) {
-            throw new IOException(e.getMessage(), e);
         } catch (PKCSException | InvalidKeySpecException e) {
             LOGGER.log(Level.WARNING, "Could not read PEM encrypted information", e);
             throw new UnrecoverableKeyException();
@@ -230,6 +217,19 @@ public final class PEMEncodable {
             throw new AssertionError(
                     "RSA algorithm support is mandated by Java Language Specification. See https://docs.oracle.com/javase/7/docs/api/java/security/KeyFactory.html");
         }
+    }
+
+    private static PEMEncodable getPEMEncodableKeyPairFromPrivateKey(PrivateKey pk) throws NoSuchAlgorithmException, InvalidKeySpecException {
+        // JENKINS-35661 in this case we know how to get the public key too
+        if (pk instanceof RSAPrivateCrtKey) {
+            // obtain public key spec from the private key
+            RSAPrivateCrtKey rsaPK = (RSAPrivateCrtKey) pk;
+            RSAPublicKeySpec pubKeySpec = new RSAPublicKeySpec(rsaPK.getModulus(), rsaPK.getPublicExponent());
+            KeyFactory kf = KeyFactory.getInstance("RSA");
+            return new PEMEncodable(new KeyPair(kf.generatePublic(pubKeySpec), rsaPK));
+        }
+
+        return new PEMEncodable(pk);
     }
 
     /**
