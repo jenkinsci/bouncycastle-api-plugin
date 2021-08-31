@@ -11,6 +11,8 @@ import org.kohsuke.accmod.restrictions.suppressions.SuppressRestrictedWarnings;
 import hudson.Main;
 import hudson.Plugin;
 import hudson.PluginWrapper;
+import hudson.remoting.Which;
+import java.io.IOException;
 import jenkins.model.Jenkins;
 import jenkins.util.AntClassLoader;
 
@@ -51,7 +53,7 @@ public class BouncyCastlePlugin extends Plugin {
 
         if (optionalLibs == null || optionalLibs.length == 0) {
             if (Main.isUnitTest) {
-                LOG.log(Level.INFO, "No optional-libs found, for non RealJenkinsRule this is fine and can be ignored.");
+                LOG.log(Level.INFO, "{0} not found; for non RealJenkinsRule this is fine and can be ignored.", optionalLibDir);
             } else {
                 LOG.log(Level.WARNING, "No optional-libs not found at {0}, BouncyCastle APIs will be unavailable causing strange runtime issues.", optionalLibDir);
                 // fail fast, most likely a packaging issue
@@ -73,7 +75,7 @@ public class BouncyCastlePlugin extends Plugin {
     }
 
 
-    private final File getOptionalLibDirectory() {
+    private final File getOptionalLibDirectory() throws IOException {
         PluginWrapper pw = getWrapper();
         File explodedPluginsDir = pw.parent.getWorkDir();
         if (explodedPluginsDir == null) {
@@ -82,6 +84,14 @@ public class BouncyCastlePlugin extends Plugin {
             LOG.log(Level.FINE, "plugindir not specified, falling back to $'{'JENKINS_HOME/plugins'}' as {0}", explodedPluginsDir);
         }
         File f =  new File(explodedPluginsDir, pw.getShortName() + "/WEB-INF/optional-lib/");
+        if (!f.isDirectory()) {
+            File here = Which.jarFile(BouncyCastlePlugin.class);
+            File alt = new File(here.getParentFile().getParentFile(), "optional-lib");
+            if (alt.isDirectory()) {
+                LOG.log(Level.FINE, "fallback based on {0}", here);
+                f = alt;
+            }
+        }
         LOG.log(Level.FINE, "using {0} as the optional-lib directory", f);
         return f;
     }
