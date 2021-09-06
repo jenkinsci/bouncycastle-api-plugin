@@ -60,12 +60,7 @@ public class BouncyCastlePlugin extends Plugin {
                 throw new IllegalStateException("BouncyCastle libs are missing from WEB-INF/optional-libs");
             }
         } else {
-            AntClassLoader cl = (AntClassLoader) this.getWrapper().classLoader;
-
-            for (File optionalLib : optionalLibs) {
-                LOG.log(Level.CONFIG, () -> "Inserting " + optionalLib + " into bouncycastle-api plugin classpath");
-                cl.addPathComponent(optionalLib);
-            }
+            this.getWrapper().injectJarsToClassapth(optionalLibs);
         }
         SecurityProviderInitializer.addSecurityProvider();
     }
