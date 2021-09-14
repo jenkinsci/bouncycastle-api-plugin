@@ -70,6 +70,7 @@
     <jenkins.version>2.312-rc31500.f3e1b0aed2da</jenkins.version>
     <java.level>8</java.level>
     <bouncycastleVersion>1.69</bouncycastleVersion>
+    <useBeta>true</useBeta>
   </properties>
 
   <repositories>
