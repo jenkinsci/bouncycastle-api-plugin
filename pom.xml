@@ -67,7 +67,7 @@
   <properties>
     <revision>2.25</revision>
     <changelist>-SNAPSHOT</changelist>
-    <jenkins.version>2.312-rc31500.f3e1b0aed2da</jenkins.version>
+    <jenkins.version>2.312-rc31504.3a18eba6e9b4</jenkins.version>
     <java.level>8</java.level>
     <bouncycastleVersion>1.69</bouncycastleVersion>
     <useBeta>true</useBeta>
