@@ -60,7 +60,7 @@ public class BouncyCastlePlugin extends Plugin {
                 throw new IllegalStateException("BouncyCastle libs are missing from WEB-INF/optional-libs");
             }
         } else {
-            this.getWrapper().injectJarsToClassapth(optionalLibs);
+            this.getWrapper().injectJarsToClasspath(optionalLibs);
         }
         SecurityProviderInitializer.addSecurityProvider();
     }
