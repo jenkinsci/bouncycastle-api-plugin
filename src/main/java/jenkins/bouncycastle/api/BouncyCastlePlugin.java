@@ -12,7 +12,9 @@ import hudson.Main;
 import hudson.Plugin;
 import hudson.PluginWrapper;
 import hudson.remoting.Which;
+import hudson.util.VersionNumber;
 import java.io.IOException;
+import java.lang.reflect.Method;
 import jenkins.model.Jenkins;
 import jenkins.util.AntClassLoader;
 
@@ -60,11 +62,19 @@ public class BouncyCastlePlugin extends Plugin {
                 throw new IllegalStateException("BouncyCastle libs are missing from WEB-INF/optional-libs");
             }
         } else {
-            AntClassLoader cl = (AntClassLoader) this.getWrapper().classLoader;
-
-            for (File optionalLib : optionalLibs) {
-                LOG.log(Level.CONFIG, () -> "Inserting " + optionalLib + " into bouncycastle-api plugin classpath");
-                cl.addPathComponent(optionalLib);
+            if (Jenkins.getVersion().isNewerThan(new VersionNumber("2.312"))) {
+                // TODO remove reflection when baseline > 2.312
+                // https://github.com/jenkinsci/jenkins/pull/5711
+                // and add <useBeta>true</useBeta> to the pom properties
+                // this.getWrapper().injectJarsToClasspath(optionalLibs);
+                Method m = this.getWrapper().getClass().getMethod("injectJarsToClasspath", File[].class);
+                m.invoke(this.getWrapper(), new Object[] {optionalLibs});
+            } else {
+                AntClassLoader cl = (AntClassLoader) this.getWrapper().classLoader;
+                for (File optionalLib : optionalLibs) {
+                    LOG.log(Level.CONFIG, () -> "Inserting " + optionalLib + " into bouncycastle-api plugin classpath");
+                    cl.addPathComponent(optionalLib);
+                }
             }
         }
         SecurityProviderInitializer.addSecurityProvider();
