@@ -62,7 +62,8 @@ public class BouncyCastlePlugin extends Plugin {
                 throw new IllegalStateException("BouncyCastle libs are missing from WEB-INF/optional-libs");
             }
         } else {
-            if (Jenkins.getVersion().isNewerThan(new VersionNumber("2.312"))) {
+            VersionNumber version = Jenkins.getVersion();
+            if (version != null && version.isNewerThan(new VersionNumber("2.312"))) {
                 // TODO remove reflection when baseline > 2.312
                 // https://github.com/jenkinsci/jenkins/pull/5711
                 // and add <useBeta>true</useBeta> to the pom properties
