@@ -7,16 +7,12 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.kohsuke.accmod.Restricted;
 import org.kohsuke.accmod.restrictions.NoExternalUse;
-import org.kohsuke.accmod.restrictions.suppressions.SuppressRestrictedWarnings;
 import hudson.Main;
 import hudson.Plugin;
 import hudson.PluginWrapper;
 import hudson.remoting.Which;
-import hudson.util.VersionNumber;
 import java.io.IOException;
-import java.lang.reflect.Method;
 import jenkins.model.Jenkins;
-import jenkins.util.AntClassLoader;
 
 @SuppressWarnings("deprecation") // there is no other way to achieve this at the correct lifecycle point
 @Restricted(NoExternalUse.class) // just for Jenkins access not part of the API
@@ -37,7 +33,6 @@ public class BouncyCastlePlugin extends Plugin {
     }
 
     @Override
-    @SuppressRestrictedWarnings(jenkins.util.AntClassLoader.class) // we are messing with the classloader and it has not changed in many many years
     public void start() throws Exception {
         if (!isActive) {
             // Alternative BouncyCastle is installed do no not insert these libraries
@@ -62,21 +57,7 @@ public class BouncyCastlePlugin extends Plugin {
                 throw new IllegalStateException("BouncyCastle libs are missing from WEB-INF/optional-libs");
             }
         } else {
-            VersionNumber version = Jenkins.getVersion();
-            if (version != null && version.isNewerThan(new VersionNumber("2.312"))) {
-                // TODO remove reflection when baseline > 2.312
-                // https://github.com/jenkinsci/jenkins/pull/5711
-                // and add <useBeta>true</useBeta> to the pom properties
-                // this.getWrapper().injectJarsToClasspath(optionalLibs);
-                Method m = this.getWrapper().getClass().getMethod("injectJarsToClasspath", File[].class);
-                m.invoke(this.getWrapper(), new Object[] {optionalLibs});
-            } else {
-                AntClassLoader cl = (AntClassLoader) this.getWrapper().classLoader;
-                for (File optionalLib : optionalLibs) {
-                    LOG.log(Level.CONFIG, () -> "Inserting " + optionalLib + " into bouncycastle-api plugin classpath");
-                    cl.addPathComponent(optionalLib);
-                }
-            }
+            this.getWrapper().injectJarsToClasspath(optionalLibs);
         }
         SecurityProviderInitializer.addSecurityProvider();
     }
