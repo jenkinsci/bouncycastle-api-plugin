@@ -41,9 +41,9 @@ import org.bouncycastle.operator.InputDecryptorProvider;
 import org.bouncycastle.pkcs.PKCS8EncryptedPrivateKeyInfo;
 import org.bouncycastle.pkcs.PKCSException;
 import org.bouncycastle.pkcs.jcajce.JcePKCSPBEInputDecryptorProviderBuilder;
-import javax.annotation.CheckForNull;
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
+import edu.umd.cs.findbugs.annotations.CheckForNull;
+import edu.umd.cs.findbugs.annotations.NonNull;
+import edu.umd.cs.findbugs.annotations.Nullable;
 import java.io.File;
 import java.io.IOException;
 import java.io.StringReader;
@@ -80,7 +80,7 @@ public final class PEMEncodable {
     /**
      * Stores the internal Bouncy Castle or JCA object
      */
-    @Nonnull
+    @NonNull
     private final Object object;
 
     private static final Provider BOUNCY_CASTLE_PROVIDER;
@@ -100,7 +100,7 @@ public final class PEMEncodable {
         BOUNCY_CASTLE_PROVIDER = provider;
     }
 
-    private PEMEncodable(@Nonnull Object pemObject) {
+    private PEMEncodable(@NonNull Object pemObject) {
         this.object = pemObject;
     }
 
@@ -110,8 +110,8 @@ public final class PEMEncodable {
      * @param key {@link Key} object with the key
      * @return {@link PEMEncodable} object
      */
-    @Nonnull
-    public static PEMEncodable create(@Nonnull Key key) {
+    @NonNull
+    public static PEMEncodable create(@NonNull Key key) {
         return new PEMEncodable(key);
     }
 
@@ -121,8 +121,8 @@ public final class PEMEncodable {
      * @param keyPair {@link KeyPair} object with the key pair
      * @return {@link PEMEncodable} object
      */
-    @Nonnull
-    public static PEMEncodable create(@Nonnull KeyPair keyPair) {
+    @NonNull
+    public static PEMEncodable create(@NonNull KeyPair keyPair) {
         return new PEMEncodable(keyPair);
     }
 
@@ -132,8 +132,8 @@ public final class PEMEncodable {
      * @param certificate {@link Certificate} object with the certificate
      * @return {@link PEMEncodable} object
      */
-    @Nonnull
-    public static PEMEncodable create(@Nonnull Certificate certificate) {
+    @NonNull
+    public static PEMEncodable create(@NonNull Certificate certificate) {
         return new PEMEncodable(certificate);
     }
 
@@ -145,8 +145,8 @@ public final class PEMEncodable {
      * @throws IOException launched if a problem exists reading the PEM information
      * @throws UnrecoverableKeyException in case PEM is passphrase protected and none or wrong is provided
      */
-    @Nonnull
-    public static PEMEncodable decode(@Nonnull String pem) throws IOException, UnrecoverableKeyException {
+    @NonNull
+    public static PEMEncodable decode(@NonNull String pem) throws IOException, UnrecoverableKeyException {
         return decode(pem, null);
     }
 
@@ -161,8 +161,8 @@ public final class PEMEncodable {
      * @throws IOException launched if a problem exists reading the PEM information
      * @throws UnrecoverableKeyException in case PEM is passphrase protected and none or wrong is provided
      */
-    @Nonnull
-    public static PEMEncodable decode(@Nonnull String pem, @Nullable final char[] passphrase)
+    @NonNull
+    public static PEMEncodable decode(@NonNull String pem, @Nullable final char[] passphrase)
             throws IOException, UnrecoverableKeyException {
 
         try (PEMParser parser = new PEMParser(new StringReader(pem))) {
@@ -238,7 +238,7 @@ public final class PEMEncodable {
      * @return PEM encoded data
      * @throws IOException launched if a problem exists generating the PEM information
      */
-    @Nonnull
+    @NonNull
     public String encode() throws IOException {
         StringWriter sw = new StringWriter();
         try (JcaPEMWriter w = new JcaPEMWriter(sw)) {
@@ -255,8 +255,8 @@ public final class PEMEncodable {
      * @throws IOException launched if a problem exists reading the PEM information or the {@link File}
      * @throws UnrecoverableKeyException in case PEM is passphrase protected and none or wrong is provided
      */
-    @Nonnull
-    public static PEMEncodable read(@Nonnull File pemFile) throws IOException, UnrecoverableKeyException {
+    @NonNull
+    public static PEMEncodable read(@NonNull File pemFile) throws IOException, UnrecoverableKeyException {
         return read(pemFile, null);
     }
 
@@ -271,8 +271,8 @@ public final class PEMEncodable {
      * @throws IOException launched if a problem exists reading the PEM information or the {@link File}
      * @throws UnrecoverableKeyException in case PEM is passphrase protected and none or wrong is provided
      */
-    @Nonnull
-    public static PEMEncodable read(@Nonnull File pemFile, @Nullable char[] passphrase)
+    @NonNull
+    public static PEMEncodable read(@NonNull File pemFile, @Nullable char[] passphrase)
             throws IOException, UnrecoverableKeyException {
         return decode(FileUtils.readFileToString(pemFile, StandardCharsets.UTF_8), passphrase);
     }
@@ -284,7 +284,7 @@ public final class PEMEncodable {
      * 
      * @throws IOException launched if a problem exists generating the PEM information or writing the {@link File}
      */
-    public void write(@Nonnull File pemFile) throws IOException {
+    public void write(@NonNull File pemFile) throws IOException {
         FileUtils.writeStringToFile(pemFile, encode(), StandardCharsets.UTF_8);
     }
 
@@ -424,8 +424,8 @@ public final class PEMEncodable {
      * @param k the key to generate the digest from
      * @return the generated digest
      */
-    @Nonnull
-    public static byte[] getKeyDigestSHA1(@Nonnull Key k) {
+    @NonNull
+    public static byte[] getKeyDigestSHA1(@NonNull Key k) {
         try {
             return getKeyDigest(k, "SHA1");
         } catch (NoSuchAlgorithmException e) {
@@ -440,8 +440,8 @@ public final class PEMEncodable {
      * @param k the key to generate the digest from
      * @return the generated digest
      */
-    @Nonnull
-    public static byte[] getKeyDigestMD5(@Nonnull Key k) {
+    @NonNull
+    public static byte[] getKeyDigestMD5(@NonNull Key k) {
         try {
             return getKeyDigest(k, "MD5");
         } catch (NoSuchAlgorithmException e) {
@@ -459,8 +459,8 @@ public final class PEMEncodable {
      * @return the generated digest
      * @throws NoSuchAlgorithmException when provided digest algorithm is not available
      */
-    @Nonnull
-    public static byte[] getKeyDigest(@Nonnull Key k, @Nonnull String algorithm) throws NoSuchAlgorithmException {
+    @NonNull
+    public static byte[] getKeyDigest(@NonNull Key k, @NonNull String algorithm) throws NoSuchAlgorithmException {
         MessageDigest md = MessageDigest.getInstance(algorithm);
         md.update(k.getEncoded());
         return md.digest();
@@ -472,8 +472,8 @@ public final class PEMEncodable {
      * @param data to be encoded
      * @return hex formated string "ab:cd:ef:...:12"
      */
-    @Nonnull
-    private static String hexEncode(@Nonnull byte[] data) {
+    @NonNull
+    private static String hexEncode(@NonNull byte[] data) {
         char[] hex = Hex.encodeHex(data);
         StringBuilder buf = new StringBuilder(hex.length + Math.max(0, hex.length / 2 - 1));
         for (int i = 0; i < hex.length; i += 2) {
