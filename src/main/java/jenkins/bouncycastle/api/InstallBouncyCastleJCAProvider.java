@@ -31,7 +31,7 @@ import java.io.IOException;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
-import javax.annotation.Nonnull;
+import edu.umd.cs.findbugs.annotations.NonNull;
 
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 
@@ -73,7 +73,7 @@ public class InstallBouncyCastleJCAProvider extends MasterToSlaveCallable<Boolea
      * {@inheritDoc}
      */
     @Override
-    @Nonnull
+    @NonNull
     public Boolean call() throws Exception {
         BcProviderRegistration.register(prioritize);
         return Boolean.TRUE;
@@ -88,7 +88,7 @@ public class InstallBouncyCastleJCAProvider extends MasterToSlaveCallable<Boolea
      * @throws SecurityException if the remote JVM has a security manager
      * @throws LinkageError if there was a classloading issue on the remote agent.
      */
-    public static void on(@Nonnull SlaveComputer c) throws IOException, InterruptedException {
+    public static void on(@NonNull SlaveComputer c) throws IOException, InterruptedException {
         Channel channel = c.getChannel();
         if (channel != null) {
             on(channel);
@@ -105,7 +105,7 @@ public class InstallBouncyCastleJCAProvider extends MasterToSlaveCallable<Boolea
      * @throws SecurityException if the remote JVM has a security manager
      * @throws LinkageError if there was a classloading issue on the remote agent.
      */
-    public static void on(@Nonnull Channel channel) throws IOException, InterruptedException {
+    public static void on(@NonNull Channel channel) throws IOException, InterruptedException {
         if (!BouncyCastlePlugin.isActive()) {
             return;
         }
