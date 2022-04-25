@@ -29,7 +29,7 @@
   <parent>
     <groupId>org.jenkins-ci.plugins</groupId>
     <artifactId>plugin</artifactId>
-    <version>4.38</version>
+    <version>4.40</version>
     <relativePath />
   </parent>
 
@@ -59,7 +59,7 @@
   </developers>
 
   <scm>
-    <connection>scm:git:git://github.com/jenkinsci/bouncycastle-api-plugin.git</connection>
+    <connection>scm:git:https://github.com/jenkinsci/bouncycastle-api-plugin.git</connection>
     <developerConnection>scm:git:git@github.com:jenkinsci/bouncycastle-api-plugin.git</developerConnection>
     <url>https://github.com/jenkinsci/bouncycastle-api-plugin</url>
     <tag>${scmTag}</tag>
@@ -69,7 +69,6 @@
     <revision>2.26</revision>
     <changelist>-SNAPSHOT</changelist>
     <jenkins.version>2.319.1</jenkins.version>
-    <java.level>8</java.level>
     <bouncycastleVersion>1.70</bouncycastleVersion>
     <useBeta>true</useBeta>
   </properties>
