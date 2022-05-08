@@ -40,7 +40,7 @@ On Jenkins core 1.648, Bouncy Castle was bumped from version `1.47` to `1.54` as
 **Proposed solution**
 A possible solution to this problem would to create a plugin (this plugin) from which plugins using BC will depend. Responsible for:
 * Load BC into uber class loader.
-* Register BC as a JVM security provider in order to allow other plugins to use JCA API with BC algorithms. 
+* Register BC as a JVM security provider in order to whitelist other plugins to use JCA API with BC algorithms. 
 * Provide an API to do common tasks like PEM Encoding/Decoding ensuring its stability among BC versions.
 
 
