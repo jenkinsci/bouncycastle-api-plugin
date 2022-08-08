@@ -69,7 +69,7 @@
     <revision>2.27</revision>
     <changelist>-SNAPSHOT</changelist>
     <jenkins.version>2.319.1</jenkins.version>
-    <bouncycastleVersion>1.70</bouncycastleVersion>
+    <bouncycastleVersion>1.71</bouncycastleVersion>
     <useBeta>true</useBeta>
   </properties>
 
@@ -98,17 +98,17 @@
     -->
     <dependency>
       <groupId>org.bouncycastle</groupId>
-      <artifactId>bcpkix-jdk15on</artifactId>
+      <artifactId>bcpkix-jdk18on</artifactId>
       <version>${bouncycastleVersion}</version>
     </dependency>
     <dependency>
       <groupId>org.bouncycastle</groupId>
-      <artifactId>bcprov-jdk15on</artifactId>
+      <artifactId>bcprov-jdk18on</artifactId>
       <version>${bouncycastleVersion}</version>
     </dependency>
     <dependency>
       <groupId>org.bouncycastle</groupId>
-      <artifactId>bcutil-jdk15on</artifactId>
+      <artifactId>bcutil-jdk18on</artifactId>
       <version>${bouncycastleVersion}</version>
     </dependency>
     <dependency>
