@@ -29,7 +29,7 @@
   <parent>
     <groupId>org.jenkins-ci.plugins</groupId>
     <artifactId>plugin</artifactId>
-    <version>4.47</version>
+    <version>4.63</version>
     <relativePath />
   </parent>
 
@@ -68,7 +68,7 @@
   <properties>
     <revision>2.28</revision>
     <changelist>-SNAPSHOT</changelist>
-    <jenkins.version>2.319.1</jenkins.version>
+    <jenkins.version>2.361.4</jenkins.version>
     <bouncycastleVersion>1.72</bouncycastleVersion>
     <useBeta>true</useBeta>
   </properties>
