@@ -69,7 +69,7 @@
     <revision>2.29</revision>
     <changelist>-SNAPSHOT</changelist>
     <jenkins.version>2.361.4</jenkins.version>
-    <bouncycastleVersion>1.73</bouncycastleVersion>
+    <bouncycastleVersion>1.74</bouncycastleVersion>
     <useBeta>true</useBeta>
   </properties>
 
