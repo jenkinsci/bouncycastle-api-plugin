@@ -34,7 +34,7 @@
   </parent>
 
   <artifactId>bouncycastle-api</artifactId>
-  <version>2.30-${revision}-${changelist}</version>
+  <version>2.30.${revision}-${changelist}</version>
   <packaging>hpi</packaging>
 
   <name>bouncycastle API Plugin</name>
