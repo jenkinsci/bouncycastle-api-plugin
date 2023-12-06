@@ -34,7 +34,7 @@
   </parent>
 
   <artifactId>bouncycastle-api</artifactId>
-  <version>${revision}${changelist}</version>
+  <version>2.30.${revision}-${changelist}</version>
   <packaging>hpi</packaging>
 
   <name>bouncycastle API Plugin</name>
@@ -66,10 +66,9 @@
   </scm>
 
   <properties>
-    <revision>2.30</revision>
-    <changelist>-SNAPSHOT</changelist>
+    <revision>1.77</revision>
+    <changelist>999999-SNAPSHOT</changelist>
     <jenkins.version>2.361.4</jenkins.version>
-    <bouncycastleVersion>1.77</bouncycastleVersion>
     <useBeta>true</useBeta>
   </properties>
 
@@ -99,17 +98,17 @@
     <dependency>
       <groupId>org.bouncycastle</groupId>
       <artifactId>bcpkix-jdk18on</artifactId>
-      <version>${bouncycastleVersion}</version>
+      <version>${revision}</version>
     </dependency>
     <dependency>
       <groupId>org.bouncycastle</groupId>
       <artifactId>bcprov-jdk18on</artifactId>
-      <version>${bouncycastleVersion}</version>
+      <version>${revision}</version>
     </dependency>
     <dependency>
       <groupId>org.bouncycastle</groupId>
       <artifactId>bcutil-jdk18on</artifactId>
-      <version>${bouncycastleVersion}</version>
+      <version>${revision}</version>
     </dependency>
     <dependency>
         <groupId>org.assertj</groupId>
