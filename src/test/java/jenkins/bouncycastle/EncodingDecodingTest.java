@@ -39,7 +39,7 @@ import java.security.PublicKey;
 import java.security.Security;
 import java.security.cert.Certificate;
 import java.util.Arrays;
-
+import jenkins.bouncycastle.api.PEMEncodable;
 import org.apache.commons.io.FileUtils;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.util.encoders.Base64;
@@ -49,8 +49,6 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
 import org.jvnet.hudson.test.Issue;
-
-import jenkins.bouncycastle.api.PEMEncodable;
 
 public class EncodingDecodingTest {
 
@@ -64,7 +62,8 @@ public class EncodingDecodingTest {
         Security.removeProvider(BouncyCastleProvider.PROVIDER_NAME);
     }
 
-    private static final String PUBLIC_KEY = "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAss5HtiSf5uuHsCNwTr2vqjFgZFnAKvZ8akFNvstouA6h3oshssI4xFOWcVOAQu6u7ZNLwldwMYo1oGbvwIoSkt7L1JTgliAkXbSTdeQjbL80Tk+jGd8+gEPqcUhqCSr/GBPA/OoNkWvTR0cv1Tlna/OcLoOb+AvoYrj+wz/N8qFGOOco5eHVYEgy/YJUX//DIyS8JV9EE/3327j+VRgvDJKewc/y5iHqPMxEabexbmESuwOnEKQ7BLr0RA/8ZIIZtSFP2Eeq1rd1sXK9d3DW9i6hwiQki+NSskFfqpig2fkDVnPkPcMBTkqgV8whKp+A088yYXIowAPIs/cLU5T3bwIDAQAB";
+    private static final String PUBLIC_KEY =
+            "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAss5HtiSf5uuHsCNwTr2vqjFgZFnAKvZ8akFNvstouA6h3oshssI4xFOWcVOAQu6u7ZNLwldwMYo1oGbvwIoSkt7L1JTgliAkXbSTdeQjbL80Tk+jGd8+gEPqcUhqCSr/GBPA/OoNkWvTR0cv1Tlna/OcLoOb+AvoYrj+wz/N8qFGOOco5eHVYEgy/YJUX//DIyS8JV9EE/3327j+VRgvDJKewc/y5iHqPMxEabexbmESuwOnEKQ7BLr0RA/8ZIIZtSFP2Eeq1rd1sXK9d3DW9i6hwiQki+NSskFfqpig2fkDVnPkPcMBTkqgV8whKp+A088yYXIowAPIs/cLU5T3bwIDAQAB";
     // private static final String SIGNATURE =
     // "XD8DdwOkX+o0huK8N/QS/AJyuL4mpj5lJlXlTYQZOyYoCJ892rY4Q12IDUPIT7nxBTQsqf6SIAaQda5OhBb+0RGHk5A770ANfe+OMtxBuIvhirorJ2RWjeZ+nWi6WEwSpYurBi5w73PdPJLth8MT5LmjQhKqnuFF6N/S5iyKGt108d8YAkHGDXGcRQE+AFYMaDpCqAAWhngPqe8WbbSrRwsUHXdEuAXgvlhJ0bwaK7WsConlk8fpBOQ7v9MKgfX7ww1VleDydReGzC6V2ayhXAbDs8Sp00hgc1LS/uPyumzztXqVRzkVLY3RZzASQVdM99a0WhOWdvc2W3Ycg1chKA==";
     private static File PRIVATE_KEY_PEM;
@@ -94,7 +93,10 @@ public class EncodingDecodingTest {
     }
 
     private static File getResourceFile(String resource) throws URISyntaxException {
-        return new File(EncodingDecodingTest.class.getClassLoader().getResource(resource).toURI());
+        return new File(EncodingDecodingTest.class
+                .getClassLoader()
+                .getResource(resource)
+                .toURI());
     }
 
     @Test
@@ -104,10 +106,10 @@ public class EncodingDecodingTest {
         assertEquals(
                 new String(Base64.encode(pemEnc.toKeyPair().getPrivate().getEncoded()), StandardCharsets.UTF_8),
                 new String(Base64.encode(pemEnc.toPrivateKey().getEncoded()), StandardCharsets.UTF_8));
-        assertEquals(PUBLIC_KEY,
+        assertEquals(
+                PUBLIC_KEY,
                 new String(Base64.encode(pemEnc.toKeyPair().getPublic().getEncoded()), StandardCharsets.UTF_8));
-        assertEquals(PUBLIC_KEY,
-                new String(Base64.encode(pemEnc.toPublicKey().getEncoded()), StandardCharsets.UTF_8));
+        assertEquals(PUBLIC_KEY, new String(Base64.encode(pemEnc.toPublicKey().getEncoded()), StandardCharsets.UTF_8));
     }
 
     @Test
@@ -117,24 +119,24 @@ public class EncodingDecodingTest {
         assertEquals(
                 new String(Base64.encode(pemEnc.toKeyPair().getPrivate().getEncoded()), StandardCharsets.UTF_8),
                 new String(Base64.encode(pemEnc.toPrivateKey().getEncoded()), StandardCharsets.UTF_8));
-        assertEquals(PUBLIC_KEY,
+        assertEquals(
+                PUBLIC_KEY,
                 new String(Base64.encode(pemEnc.toKeyPair().getPublic().getEncoded()), StandardCharsets.UTF_8));
-        assertEquals(PUBLIC_KEY,
-                new String(Base64.encode(pemEnc.toPublicKey().getEncoded()), StandardCharsets.UTF_8));
+        assertEquals(PUBLIC_KEY, new String(Base64.encode(pemEnc.toPublicKey().getEncoded()), StandardCharsets.UTF_8));
     }
 
     @Test
-    @Issue(value="JENKINS-66394") 
+    @Issue(value = "JENKINS-66394")
     public void testReadPrivateKeyWithPasswordPKCS8() throws Exception {
         PEMEncodable pemEnc = PEMEncodable.read(PRIVATE_KEY_PW_PKCS8, "test".toCharArray());
 
         assertEquals(
                 new String(Base64.encode(pemEnc.toKeyPair().getPrivate().getEncoded()), StandardCharsets.UTF_8),
                 new String(Base64.encode(pemEnc.toPrivateKey().getEncoded()), StandardCharsets.UTF_8));
-        assertEquals(PUBLIC_KEY,
+        assertEquals(
+                PUBLIC_KEY,
                 new String(Base64.encode(pemEnc.toKeyPair().getPublic().getEncoded()), StandardCharsets.UTF_8));
-        assertEquals(PUBLIC_KEY,
-                new String(Base64.encode(pemEnc.toPublicKey().getEncoded()), StandardCharsets.UTF_8));
+        assertEquals(PUBLIC_KEY, new String(Base64.encode(pemEnc.toPublicKey().getEncoded()), StandardCharsets.UTF_8));
     }
 
     @Test
@@ -145,7 +147,8 @@ public class EncodingDecodingTest {
         PEMEncodable pemEncOnlyPrivate = PEMEncodable.create(pemEnc.toPrivateKey());
 
         pemEncOnlyPrivate.write(onlyPrivate);
-        assertTrue(Arrays.equals(pemEncOnlyPrivate.toPrivateKey().getEncoded(),
+        assertTrue(Arrays.equals(
+                pemEncOnlyPrivate.toPrivateKey().getEncoded(),
                 pemEnc.toPrivateKey().getEncoded()));
         assertThat(contentOf(onlyPrivate)).isEqualToNormalizingNewlines(contentOf(PRIVATE_KEY_PEM));
     }
@@ -154,8 +157,7 @@ public class EncodingDecodingTest {
     public void testReadPublicKeyPEM() throws Exception {
         PEMEncodable pemEnc = PEMEncodable.read(PUBLIC_KEY_PEM);
 
-        assertEquals(PUBLIC_KEY,
-                new String(Base64.encode(pemEnc.toPublicKey().getEncoded()), StandardCharsets.UTF_8));
+        assertEquals(PUBLIC_KEY, new String(Base64.encode(pemEnc.toPublicKey().getEncoded()), StandardCharsets.UTF_8));
     }
 
     @Test
@@ -175,7 +177,6 @@ public class EncodingDecodingTest {
         assertNull(pemEncOnlyPrivate.toPublicKey());
         assertNull(pemEncOnlyPrivate.toKeyPair());
         assertNull(pemEncOnlyPrivate.toCertificate());
-
     }
 
     @Test
@@ -187,7 +188,8 @@ public class EncodingDecodingTest {
         PublicKey publicKey = pemEncKey.toPublicKey();
         assertNotNull(certificate);
         assertNotNull(publicKey);
-        assertEquals(new String(Base64.encode(certificate.getPublicKey().getEncoded()), StandardCharsets.UTF_8),
+        assertEquals(
+                new String(Base64.encode(certificate.getPublicKey().getEncoded()), StandardCharsets.UTF_8),
                 new String(Base64.encode(publicKey.getEncoded()), StandardCharsets.UTF_8));
     }
 
@@ -200,7 +202,8 @@ public class EncodingDecodingTest {
         PublicKey publicKey = pemEncKey.toPublicKey();
         assertNotNull(certificate);
         assertNotNull(publicKey);
-        assertEquals(new String(Base64.encode(certificate.getPublicKey().getEncoded()), StandardCharsets.UTF_8),
+        assertEquals(
+                new String(Base64.encode(certificate.getPublicKey().getEncoded()), StandardCharsets.UTF_8),
                 new String(Base64.encode(publicKey.getEncoded()), StandardCharsets.UTF_8));
     }
 
@@ -253,10 +256,9 @@ public class EncodingDecodingTest {
 
         assertThat(contentOf(pemFileNew)).isEqualToNormalizingNewlines(contentOf(PRIVATE_KEY_PEM));
     }
-    
-    
+
     @Test
-    @Issue(value="JENKINS-35661") 
+    @Issue(value = "JENKINS-35661")
     public void testReadKeyPairFromPCKS8PEM() throws Exception {
         PEMEncodable pemEnc = PEMEncodable.read(getResourceFile("private-key-pcks8.pem"));
         assertNotNull(pemEnc.toKeyPair());

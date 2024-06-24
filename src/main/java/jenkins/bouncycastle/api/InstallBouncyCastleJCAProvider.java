@@ -24,20 +24,17 @@
 
 package jenkins.bouncycastle.api;
 
+import edu.umd.cs.findbugs.annotations.NonNull;
+import hudson.remoting.Channel;
 import hudson.remoting.ChannelProperty;
+import hudson.remoting.Future;
 import hudson.slaves.SlaveComputer;
 import java.io.IOException;
-
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
-import edu.umd.cs.findbugs.annotations.NonNull;
-
-import org.bouncycastle.jce.provider.BouncyCastleProvider;
-
-import hudson.remoting.Channel;
-import hudson.remoting.Future;
 import jenkins.security.MasterToSlaveCallable;
+import org.bouncycastle.jce.provider.BouncyCastleProvider;
 
 /**
  * Allows registering Bouncy Castle on a remote agent. Just call {@link #on(Channel)} or {@link #on(SlaveComputer)}.
@@ -54,8 +51,8 @@ public class InstallBouncyCastleJCAProvider extends MasterToSlaveCallable<Boolea
     /**
      * The property that holds the future for registration.
      */
-    private static final ChannelProperty<Future> BOUNCYCASTLE_REGISTERED
-            = new ChannelProperty<>(Future.class, "Bouncy Castle Registered");
+    private static final ChannelProperty<Future> BOUNCYCASTLE_REGISTERED =
+            new ChannelProperty<>(Future.class, "Bouncy Castle Registered");
 
     private final boolean prioritize;
 
@@ -81,7 +78,7 @@ public class InstallBouncyCastleJCAProvider extends MasterToSlaveCallable<Boolea
 
     /**
      * Registers bouncy castle on the slave JVM
-     * 
+     *
      * @param c the slave
      * @throws IOException if there is a problem registering bouncycastle
      * @throws InterruptedException if interrupted while trying to register
@@ -96,7 +93,7 @@ public class InstallBouncyCastleJCAProvider extends MasterToSlaveCallable<Boolea
             throw new IOException("Remote agent is off-line");
         }
     }
-     /**
+    /**
      * Registers bouncy castle on the slave JVM
      *
      * @param channel the {@link Channel}

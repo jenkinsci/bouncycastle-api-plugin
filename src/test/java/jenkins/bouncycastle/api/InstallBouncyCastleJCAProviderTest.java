@@ -1,8 +1,13 @@
 package jenkins.bouncycastle.api;
 
+import static org.junit.Assert.assertNull;
+
+import hudson.remoting.Channel;
+import hudson.slaves.DumbSlave;
 import java.security.Provider;
 import java.security.Security;
 import java.util.stream.IntStream;
+import jenkins.security.MasterToSlaveCallable;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.junit.AfterClass;
 import org.junit.Assert;
@@ -10,11 +15,6 @@ import org.junit.BeforeClass;
 import org.junit.Rule;
 import org.junit.Test;
 import org.jvnet.hudson.test.JenkinsRule;
-
-import hudson.remoting.Channel;
-import hudson.slaves.DumbSlave;
-import jenkins.security.MasterToSlaveCallable;
-import static org.junit.Assert.assertNull;
 
 public class InstallBouncyCastleJCAProviderTest {
 
@@ -74,7 +74,5 @@ public class InstallBouncyCastleJCAProviderTest {
                     .findFirst()
                     .orElse(-1); // if BC not found
         }
-
     }
-
 }

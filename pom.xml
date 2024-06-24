@@ -22,7 +22,6 @@
  ~ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  ~ THE SOFTWARE.
  -->
-
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
 
@@ -38,9 +37,7 @@
   <packaging>hpi</packaging>
 
   <name>bouncycastle API Plugin</name>
-  <description>
-    This plugin provides an stable API to Bouncy Castle related tasks.
-  </description>
+  <description>This plugin provides an stable API to Bouncy Castle related tasks.</description>
   <url>https://github.com/jenkinsci/bouncycastle-api-plugin</url>
   <licenses>
     <license>
@@ -61,8 +58,8 @@
   <scm>
     <connection>scm:git:https://github.com/jenkinsci/bouncycastle-api-plugin.git</connection>
     <developerConnection>scm:git:git@github.com:jenkinsci/bouncycastle-api-plugin.git</developerConnection>
-    <url>https://github.com/jenkinsci/bouncycastle-api-plugin</url>
     <tag>${scmTag}</tag>
+    <url>https://github.com/jenkinsci/bouncycastle-api-plugin</url>
   </scm>
 
   <properties>
@@ -70,21 +67,8 @@
     <changelist>999999-SNAPSHOT</changelist>
     <jenkins.version>2.361.4</jenkins.version>
     <useBeta>true</useBeta>
+    <spotless.check.skip>false</spotless.check.skip>
   </properties>
-
-  <repositories>
-    <repository>
-      <id>repo.jenkins-ci.org</id>
-      <url>https://repo.jenkins-ci.org/public/</url>
-    </repository>
-  </repositories>
-
-  <pluginRepositories>
-    <pluginRepository>
-      <id>repo.jenkins-ci.org</id>
-      <url>https://repo.jenkins-ci.org/public/</url>
-    </pluginRepository>
-  </pluginRepositories>
 
   <dependencies>
     <!--
@@ -111,12 +95,26 @@
       <version>${revision}</version>
     </dependency>
     <dependency>
-        <groupId>org.assertj</groupId>
-        <artifactId>assertj-core</artifactId>
-        <version>3.26.0</version>
-        <scope>test</scope>
+      <groupId>org.assertj</groupId>
+      <artifactId>assertj-core</artifactId>
+      <version>3.26.0</version>
+      <scope>test</scope>
     </dependency>
   </dependencies>
+
+  <repositories>
+    <repository>
+      <id>repo.jenkins-ci.org</id>
+      <url>https://repo.jenkins-ci.org/public/</url>
+    </repository>
+  </repositories>
+
+  <pluginRepositories>
+    <pluginRepository>
+      <id>repo.jenkins-ci.org</id>
+      <url>https://repo.jenkins-ci.org/public/</url>
+    </pluginRepository>
+  </pluginRepositories>
 
   <build>
     <pluginManagement>

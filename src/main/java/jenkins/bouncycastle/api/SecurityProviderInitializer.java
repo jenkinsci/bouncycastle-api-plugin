@@ -25,13 +25,12 @@
 package jenkins.bouncycastle.api;
 
 import java.util.logging.Logger;
-
 import org.kohsuke.accmod.Restricted;
 import org.kohsuke.accmod.restrictions.NoExternalUse;
 
 /**
  * Initialization class to register Bouncy Castle as a security provider.
- * 
+ *
  * @since 1.0
  */
 public class SecurityProviderInitializer {
@@ -42,7 +41,7 @@ public class SecurityProviderInitializer {
      * Initializes JVM security to Bouncy Castle. This initialization should be done before any plugin is loaded in
      * order to ensure that the provider is available to any plugin that needs it and that we are the first to register
      * it.
-     * 
+     *
      */
     @Restricted(NoExternalUse.class)
     static void addSecurityProvider() {
@@ -50,5 +49,4 @@ public class SecurityProviderInitializer {
         BcProviderRegistration.register();
         LOGGER.fine("Bouncy Castle security provider initialized.");
     }
-
 }

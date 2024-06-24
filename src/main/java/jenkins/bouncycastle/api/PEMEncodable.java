@@ -24,23 +24,6 @@
 
 package jenkins.bouncycastle.api;
 
-import org.apache.commons.codec.binary.Hex;
-import org.apache.commons.io.FileUtils;
-import org.bouncycastle.asn1.pkcs.PrivateKeyInfo;
-import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo;
-import org.bouncycastle.cert.X509CertificateHolder;
-import org.bouncycastle.cert.jcajce.JcaX509CertificateConverter;
-import org.bouncycastle.openssl.PEMDecryptorProvider;
-import org.bouncycastle.openssl.PEMEncryptedKeyPair;
-import org.bouncycastle.openssl.PEMKeyPair;
-import org.bouncycastle.openssl.PEMParser;
-import org.bouncycastle.openssl.jcajce.JcaPEMKeyConverter;
-import org.bouncycastle.openssl.jcajce.JcaPEMWriter;
-import org.bouncycastle.openssl.jcajce.JcePEMDecryptorProviderBuilder;
-import org.bouncycastle.operator.InputDecryptorProvider;
-import org.bouncycastle.pkcs.PKCS8EncryptedPrivateKeyInfo;
-import org.bouncycastle.pkcs.PKCSException;
-import org.bouncycastle.pkcs.jcajce.JcePKCSPBEInputDecryptorProviderBuilder;
 import edu.umd.cs.findbugs.annotations.CheckForNull;
 import edu.umd.cs.findbugs.annotations.NonNull;
 import edu.umd.cs.findbugs.annotations.Nullable;
@@ -68,6 +51,23 @@ import java.util.Arrays;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
+import org.apache.commons.codec.binary.Hex;
+import org.apache.commons.io.FileUtils;
+import org.bouncycastle.asn1.pkcs.PrivateKeyInfo;
+import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo;
+import org.bouncycastle.cert.X509CertificateHolder;
+import org.bouncycastle.cert.jcajce.JcaX509CertificateConverter;
+import org.bouncycastle.openssl.PEMDecryptorProvider;
+import org.bouncycastle.openssl.PEMEncryptedKeyPair;
+import org.bouncycastle.openssl.PEMKeyPair;
+import org.bouncycastle.openssl.PEMParser;
+import org.bouncycastle.openssl.jcajce.JcaPEMKeyConverter;
+import org.bouncycastle.openssl.jcajce.JcaPEMWriter;
+import org.bouncycastle.openssl.jcajce.JcePEMDecryptorProviderBuilder;
+import org.bouncycastle.operator.InputDecryptorProvider;
+import org.bouncycastle.pkcs.PKCS8EncryptedPrivateKeyInfo;
+import org.bouncycastle.pkcs.PKCSException;
+import org.bouncycastle.pkcs.jcajce.JcePKCSPBEInputDecryptorProviderBuilder;
 
 /**
  * A class that provides an API to manage PEM format, providing additional methods to handle Keys, Certificates,
@@ -92,10 +92,12 @@ public final class PEMEncodable {
             provider = Security.getProvider("BC");
         }
         if (provider == null) {
-           throw new IllegalStateException(Arrays.asList(Security.getProviders()).stream().map(p -> p.getName())
-                   .collect(Collectors.joining(",",
-                     "Couldn't locate either of bouncy castle FIPS or non fips provider, available providers are",
-                     ".")));
+            throw new IllegalStateException(Arrays.asList(Security.getProviders()).stream()
+                    .map(p -> p.getName())
+                    .collect(Collectors.joining(
+                            ",",
+                            "Couldn't locate either of bouncy castle FIPS or non fips provider, available providers are",
+                            ".")));
         }
         BOUNCY_CASTLE_PROVIDER = provider;
     }
@@ -106,7 +108,7 @@ public final class PEMEncodable {
 
     /**
      * Creates a {@link PEMEncodable} from a {@link Key} object
-     * 
+     *
      * @param key {@link Key} object with the key
      * @return {@link PEMEncodable} object
      */
@@ -117,7 +119,7 @@ public final class PEMEncodable {
 
     /**
      * Creates a {@link PEMEncodable} from a {@link KeyPair} object
-     * 
+     *
      * @param keyPair {@link KeyPair} object with the key pair
      * @return {@link PEMEncodable} object
      */
@@ -128,7 +130,7 @@ public final class PEMEncodable {
 
     /**
      * Creates a {@link PEMEncodable} from a {@link Certificate} object
-     * 
+     *
      * @param certificate {@link Certificate} object with the certificate
      * @return {@link PEMEncodable} object
      */
@@ -139,7 +141,7 @@ public final class PEMEncodable {
 
     /**
      * Creates a {@link PEMEncodable} by decoding PEM formated data from a {@link String}
-     * 
+     *
      * @param pem {@link String} with the PEM data
      * @return {@link PEMEncodable} object
      * @throws IOException launched if a problem exists reading the PEM information
@@ -152,7 +154,7 @@ public final class PEMEncodable {
 
     /**
      * Creates a {@link PEMEncodable} by decoding PEM formated data from a {@link String}
-     * 
+     *
      * @param pem {@link String} with the PEM data
      * @param passphrase passphrase for the encrypted PEM data. null if PEM data is not passphrase protected. The caller
      * is responsible for zeroing out the char[] after use to ensure the password does not stay in memory, e.g. with
@@ -170,7 +172,8 @@ public final class PEMEncodable {
             Object object = parser.readObject();
 
             if (object == null) {
-                throw new IOException("Could not parse PEM, only key pairs, private keys, public keys and certificates are supported");
+                throw new IOException(
+                        "Could not parse PEM, only key pairs, private keys, public keys and certificates are supported");
             }
 
             JcaPEMKeyConverter kConv = new JcaPEMKeyConverter().setProvider(BOUNCY_CASTLE_PROVIDER);
@@ -186,7 +189,9 @@ public final class PEMEncodable {
                 }
             } else if (object instanceof PKCS8EncryptedPrivateKeyInfo) {
                 if (passphrase != null) {
-                    InputDecryptorProvider dp = new JcePKCSPBEInputDecryptorProviderBuilder().setProvider(BOUNCY_CASTLE_PROVIDER).build(passphrase);
+                    InputDecryptorProvider dp = new JcePKCSPBEInputDecryptorProviderBuilder()
+                            .setProvider(BOUNCY_CASTLE_PROVIDER)
+                            .build(passphrase);
                     PKCS8EncryptedPrivateKeyInfo epk = (PKCS8EncryptedPrivateKeyInfo) object;
                     PrivateKey pk = kConv.getPrivateKey(epk.decryptPrivateKeyInfo(dp));
                     return getPEMEncodableKeyPairFromPrivateKey(pk);
@@ -201,7 +206,8 @@ public final class PEMEncodable {
             } else if (object instanceof SubjectPublicKeyInfo) {
                 return new PEMEncodable(kConv.getPublicKey((SubjectPublicKeyInfo) object));
             } else if (object instanceof X509CertificateHolder) {
-                JcaX509CertificateConverter cConv = new JcaX509CertificateConverter().setProvider(BOUNCY_CASTLE_PROVIDER);
+                JcaX509CertificateConverter cConv =
+                        new JcaX509CertificateConverter().setProvider(BOUNCY_CASTLE_PROVIDER);
                 return new PEMEncodable(cConv.getCertificate((X509CertificateHolder) object));
             } else {
                 throw new IOException(
@@ -219,7 +225,8 @@ public final class PEMEncodable {
         }
     }
 
-    private static PEMEncodable getPEMEncodableKeyPairFromPrivateKey(PrivateKey pk) throws NoSuchAlgorithmException, InvalidKeySpecException {
+    private static PEMEncodable getPEMEncodableKeyPairFromPrivateKey(PrivateKey pk)
+            throws NoSuchAlgorithmException, InvalidKeySpecException {
         // JENKINS-35661 in this case we know how to get the public key too
         if (pk instanceof RSAPrivateCrtKey) {
             // obtain public key spec from the private key
@@ -234,7 +241,7 @@ public final class PEMEncodable {
 
     /**
      * Encodes the current stored information in PEM format and returns it as a {@link String}
-     * 
+     *
      * @return PEM encoded data
      * @throws IOException launched if a problem exists generating the PEM information
      */
@@ -249,7 +256,7 @@ public final class PEMEncodable {
 
     /**
      * Creates a {@link PEMEncodable} by reading a PEM file
-     * 
+     *
      * @param pemFile {@link File} pointing to the PEM file to read
      * @return {@link PEMEncodable} object
      * @throws IOException launched if a problem exists reading the PEM information or the {@link File}
@@ -262,7 +269,7 @@ public final class PEMEncodable {
 
     /**
      * Creates a {@link PEMEncodable} by reading a PEM file
-     * 
+     *
      * @param pemFile {@link File} pointing to the PEM file to read
      * @param passphrase passphrase for the encrypted PEM data. null if PEM data is not passphrase protected. The caller
      * is responsible for zeroing out the char[] after use to ensure the password does not stay in memory, e.g. with
@@ -279,9 +286,9 @@ public final class PEMEncodable {
 
     /**
      * Writes the current stored information in PEM formated {@link File}
-     * 
+     *
      * @param pemFile PEM {@link File} to read
-     * 
+     *
      * @throws IOException launched if a problem exists generating the PEM information or writing the {@link File}
      */
     public void write(@NonNull File pemFile) throws IOException {
@@ -292,7 +299,7 @@ public final class PEMEncodable {
      * Obtain {@link KeyPair} object with the public and private key from the decoded PEM. No conversion is performed,
      * the read PEM must contain private and public key in order to obtain a {@link KeyPair} object, null will be
      * returned in all the other cases.
-     * 
+     *
      * @return {@link KeyPair} object with public and private keys or null if the read PEM didn't contain private and
      * public keys.
      */
@@ -308,7 +315,7 @@ public final class PEMEncodable {
     /**
      * Obtain {@link PublicKey} object from the read PEM. If the PEM data contained other object type like
      * {@link KeyPair} or {@link Certificate}, the public key will be extracted from them.
-     * 
+     *
      * @return {@link PublicKey} with the public key, null if a public key could not be obtained from the current data
      */
     @CheckForNull
@@ -325,7 +332,7 @@ public final class PEMEncodable {
 
     /**
      * Obtain {@link Certificate} object from the read PEM.
-     * 
+     *
      * @return {@link Certificate} with the certificate, null if a certificate could not be obtained from the current
      * data
      */
@@ -340,7 +347,7 @@ public final class PEMEncodable {
     /**
      * Obtain {@link PrivateKey} object from the read PEM. If the PEM data contained other object type like
      * {@link KeyPair}, the private key will be extracted from them.
-     * 
+     *
      * @return {@link PrivateKey} with the private key, null if a private key could not be obtained from the current
      * data
      */
@@ -378,7 +385,7 @@ public final class PEMEncodable {
      * <li>{@link org.bouncycastle.x509.X509V2AttributeCertificate}
      * </ul>
      * </ul>
-     * 
+     *
      * @return {@link Object} read from the PEM
      */
     @CheckForNull
@@ -389,7 +396,7 @@ public final class PEMEncodable {
     /**
      * Obtains the fingerprint of the private key in the "ab:cd:ef:...:12" format, which basically is an SHA1 digest
      * from the key, encoded in hex format.
-     * 
+     *
      * @return private key fingerprint in hex format "ab:cd:ef:...:12", null if the private key could not be obtained
      * from the current PEM data.
      */
@@ -405,7 +412,7 @@ public final class PEMEncodable {
     /**
      * Obtains the fingerprint of the public key in the "ab:cd:ef:...:12" format, which basically is an MD5 digest from
      * the key, encoded in hex format.
-     * 
+     *
      * @return public key fingerprint in hex format "ab:cd:ef:...:12", null if the public key could not be obtained from
      * the current PEM data.
      */
@@ -420,7 +427,7 @@ public final class PEMEncodable {
 
     /**
      * Generates an SHA1 digest from a Key object
-     * 
+     *
      * @param k the key to generate the digest from
      * @return the generated digest
      */
@@ -436,7 +443,7 @@ public final class PEMEncodable {
 
     /**
      * Generates an MD5 digest from a Key object
-     * 
+     *
      * @param k the key to generate the digest from
      * @return the generated digest
      */
@@ -453,7 +460,7 @@ public final class PEMEncodable {
     /**
      * Generates an digest from a Key object in the specified digest format. The supported digest formats will depend on
      * the JVM API.
-     * 
+     *
      * @param k key to generate the digest from
      * @param algorithm digest format
      * @return the generated digest
@@ -468,7 +475,7 @@ public final class PEMEncodable {
 
     /**
      * Encode {@link byte[]} in hex formated string "ab:cd:ef:...:12"
-     * 
+     *
      * @param data to be encoded
      * @return hex formated string "ab:cd:ef:...:12"
      */

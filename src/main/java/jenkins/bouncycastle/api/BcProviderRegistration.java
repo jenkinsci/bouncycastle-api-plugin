@@ -1,7 +1,6 @@
 package jenkins.bouncycastle.api;
 
 import java.security.Security;
-
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.kohsuke.accmod.Restricted;
 import org.kohsuke.accmod.restrictions.NoExternalUse;
@@ -42,5 +41,4 @@ class BcProviderRegistration {
             Security.addProvider(new BouncyCastleProvider());
         }
     }
-
 }
