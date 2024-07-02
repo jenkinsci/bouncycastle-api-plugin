@@ -35,10 +35,12 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
+import java.security.KeyPair;
 import java.security.PublicKey;
 import java.security.Security;
 import java.security.cert.Certificate;
 import java.util.Arrays;
+import java.util.List;
 import jenkins.bouncycastle.api.PEMEncodable;
 import org.apache.commons.io.FileUtils;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
@@ -73,6 +75,9 @@ public class EncodingDecodingTest {
     private static File CERTIFICATE_PUBLIC_KEY_PEM;
     private static File CERTIFICATE_PW_PEM;
     private static File CERTIFICATE_PUBLIC_KEY_PW_PEM;
+    private static File CERTIFICATE_AND_PRIVATE_KEY_PEM;
+    private static File CERTIFICATE_AND_PRIVATE_KEY_PW_PEM;
+
     private static File PRIVATE_KEY_PW_PKCS8;
 
     private static final String PRIVATE_KEY_PW = "test";
@@ -90,6 +95,8 @@ public class EncodingDecodingTest {
         CERTIFICATE_PUBLIC_KEY_PEM = getResourceFile("test_cert_key.pem");
         CERTIFICATE_PW_PEM = getResourceFile("test_cert_cert_pass.pem");
         CERTIFICATE_PUBLIC_KEY_PW_PEM = getResourceFile("test_cert_key_pass.pem");
+        CERTIFICATE_AND_PRIVATE_KEY_PEM = getResourceFile("test_cert_and_key.pem");
+        CERTIFICATE_AND_PRIVATE_KEY_PW_PEM = getResourceFile("test_cert_and_key_pass.pem");
     }
 
     private static File getResourceFile(String resource) throws URISyntaxException {
@@ -128,7 +135,7 @@ public class EncodingDecodingTest {
     @Test
     @Issue(value = "JENKINS-66394")
     public void testReadPrivateKeyWithPasswordPKCS8() throws Exception {
-        PEMEncodable pemEnc = PEMEncodable.read(PRIVATE_KEY_PW_PKCS8, "test".toCharArray());
+        PEMEncodable pemEnc = PEMEncodable.read(PRIVATE_KEY_PW_PKCS8, PRIVATE_KEY_PW.toCharArray());
 
         assertEquals(
                 new String(Base64.encode(pemEnc.toKeyPair().getPrivate().getEncoded()), StandardCharsets.UTF_8),
@@ -186,11 +193,7 @@ public class EncodingDecodingTest {
 
         Certificate certificate = pemEncCer.toCertificate();
         PublicKey publicKey = pemEncKey.toPublicKey();
-        assertNotNull(certificate);
-        assertNotNull(publicKey);
-        assertEquals(
-                new String(Base64.encode(certificate.getPublicKey().getEncoded()), StandardCharsets.UTF_8),
-                new String(Base64.encode(publicKey.getEncoded()), StandardCharsets.UTF_8));
+        assertCertificatePublicKeyMatches(certificate, publicKey);
     }
 
     @Test
@@ -200,11 +203,7 @@ public class EncodingDecodingTest {
 
         Certificate certificate = pemEncCer.toCertificate();
         PublicKey publicKey = pemEncKey.toPublicKey();
-        assertNotNull(certificate);
-        assertNotNull(publicKey);
-        assertEquals(
-                new String(Base64.encode(certificate.getPublicKey().getEncoded()), StandardCharsets.UTF_8),
-                new String(Base64.encode(publicKey.getEncoded()), StandardCharsets.UTF_8));
+        assertCertificatePublicKeyMatches(certificate, publicKey);
     }
 
     @Test
@@ -270,5 +269,38 @@ public class EncodingDecodingTest {
     @Issue(value = "JENKINS-41978")
     public void testInvalidPEM() throws Exception {
         PEMEncodable.decode(FileUtils.readFileToString(getResourceFile("invalid.pem"), StandardCharsets.UTF_8));
+    }
+
+    @Test
+    public void testReadingCertAndKeyPEM() throws Exception {
+        List<PEMEncodable> pems = PEMEncodable.readAll(CERTIFICATE_AND_PRIVATE_KEY_PEM);
+        assertThat(pems).hasSize(2);
+        assertCertPublicKeyMatches(pems.get(0).toCertificate(), pems.get(1).toKeyPair());
+    }
+
+    @Test
+    public void testReadingCertAndKeyPassPEM() throws Exception {
+        List<PEMEncodable> pems =
+                PEMEncodable.readAll(CERTIFICATE_AND_PRIVATE_KEY_PW_PEM, PRIVATE_KEY_PW.toCharArray());
+        assertThat(pems).hasSize(2);
+        assertCertPublicKeyMatches(pems.get(0).toCertificate(), pems.get(1).toKeyPair());
+    }
+
+    /**
+     * asserts that the given certificates public key corresponds to the provided KeyPair.
+     */
+    private static void assertCertPublicKeyMatches(Certificate cert, KeyPair kp) {
+        assertCertificatePublicKeyMatches(cert, kp != null ? kp.getPublic() : null);
+    }
+
+    /**
+     * asserts that the given certificates public key corresponds to the provided KeyPair.
+     */
+    private static void assertCertificatePublicKeyMatches(Certificate cert, PublicKey key) {
+        assertNotNull(cert);
+        assertNotNull(key);
+        assertEquals(
+                new String(Base64.encode(cert.getPublicKey().getEncoded()), StandardCharsets.UTF_8),
+                new String(Base64.encode(key.getEncoded()), StandardCharsets.UTF_8));
     }
 }

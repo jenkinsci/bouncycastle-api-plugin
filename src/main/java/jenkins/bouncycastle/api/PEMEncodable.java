@@ -47,7 +47,9 @@ import java.security.cert.CertificateException;
 import java.security.interfaces.RSAPrivateCrtKey;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.RSAPublicKeySpec;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
@@ -166,18 +168,46 @@ public final class PEMEncodable {
     @NonNull
     public static PEMEncodable decode(@NonNull String pem, @Nullable final char[] passphrase)
             throws IOException, UnrecoverableKeyException {
+        List<PEMEncodable> pems = decodeAll(pem, passphrase);
+        if (pems.isEmpty()) {
+            throw new IOException(
+                    "Could not parse PEM, only key pairs, private keys, public keys and certificates are supported");
+        }
+        if (pems.size() > 1) {
+            throw new IOException("Expected a single PEM entry, but got " + pems.size());
+        }
+        return pems.get(0);
+    }
+
+    /**
+     * Creates a list of {@link PEMEncodable}s by decoding PEM formated data from a {@link String}
+     *
+     * @param pem {@link String} with the PEM data
+     * @param passphrase passphrase for the encrypted PEM data. {@code null} if PEM data is not passphrase protected.
+     * The caller is responsible for zeroing out the char[] after use to ensure the password does not stay in memory, e.g. with
+     * <code>Arrays.fill(passphrase, (char)0)</code>
+     * @return a list of {@link PEMEncodable} objects
+     * @throws IOException launched if a problem exists reading the PEM information
+     * @throws UnrecoverableKeyException in case PEM is passphrase protected and none or wrong is provided
+     */
+    @NonNull
+    public static List<PEMEncodable> decodeAll(@NonNull String pem, @Nullable final char[] passphrase)
+            throws IOException, UnrecoverableKeyException {
+        List<PEMEncodable> objects = new ArrayList<>();
 
         try (PEMParser parser = new PEMParser(new StringReader(pem))) {
 
-            Object object = parser.readObject();
-
-            if (object == null) {
-                throw new IOException(
-                        "Could not parse PEM, only key pairs, private keys, public keys and certificates are supported");
+            for (Object object = parser.readObject(); object != null; object = parser.readObject()) {
+                objects.add(convertedPemToPemDecodable(object, passphrase));
             }
+        }
+        return objects;
+    }
 
+    private static final PEMEncodable convertedPemToPemDecodable(Object object, char[] passphrase)
+            throws UnrecoverableKeyException, IOException {
+        try {
             JcaPEMKeyConverter kConv = new JcaPEMKeyConverter().setProvider(BOUNCY_CASTLE_PROVIDER);
-
             // handle supported PEM formats.
             if (object instanceof PEMEncryptedKeyPair) {
                 if (passphrase != null) {
@@ -282,6 +312,36 @@ public final class PEMEncodable {
     public static PEMEncodable read(@NonNull File pemFile, @Nullable char[] passphrase)
             throws IOException, UnrecoverableKeyException {
         return decode(FileUtils.readFileToString(pemFile, StandardCharsets.UTF_8), passphrase);
+    }
+
+    /**
+     * Creates {@link PEMEncodable}s by reading a PEM file
+     *
+     * @param pemFile {@link File} pointing to the PEM file to read
+     * @return A list of {@link PEMEncodable} objects.
+     * @throws IOException launched if a problem exists reading the PEM information or the {@link File}
+     * @throws UnrecoverableKeyException in case PEM is passphrase protected
+     */
+    @NonNull
+    public static List<PEMEncodable> readAll(@NonNull File pemFile) throws IOException, UnrecoverableKeyException {
+        return readAll(pemFile, null);
+    }
+
+    /**
+     * Creates a {@link PEMEncodable}s by reading a PEM file
+     *
+     * @param pemFile {@link File} pointing to the PEM file to read
+     * @param passphrase passphrase for the encrypted PEM data. {@code null} if PEM data is not passphrase protected.
+     * The caller is responsible for zeroing out the char[] after use to ensure the password does not stay in memory, e.g. with
+     * <code>Arrays.fill(passphrase, (char)0)</code>
+     * @return a list of {@link PEMEncodable} objects
+     * @throws IOException launched if a problem exists reading the PEM information or the {@link File}
+     * @throws UnrecoverableKeyException in case PEM is passphrase protected and none or wrong is provided
+     */
+    @NonNull
+    public static List<PEMEncodable> readAll(@NonNull File pemFile, @Nullable char[] passphrase)
+            throws IOException, UnrecoverableKeyException {
+        return decodeAll(FileUtils.readFileToString(pemFile, StandardCharsets.UTF_8), passphrase);
     }
 
     /**
