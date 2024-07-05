@@ -50,7 +50,6 @@ import java.security.spec.RSAPublicKeySpec;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import org.apache.commons.codec.binary.Hex;
@@ -245,13 +244,24 @@ public final class PEMEncodable {
                                 + object.getClass().getName());
             }
         } catch (PKCSException | InvalidKeySpecException e) {
-            LOGGER.log(Level.WARNING, "Could not read PEM encrypted information", e);
-            throw new UnrecoverableKeyException();
+            UnrecoverableKeyException unrecoverableKeyEx = new UnrecoverableKeyException(e.getMessage());
+            unrecoverableKeyEx.initCause(e);
+            throw unrecoverableKeyEx;
         } catch (CertificateException e) {
             throw new IOException("Could not read certificate", e);
         } catch (NoSuchAlgorithmException e) {
-            throw new AssertionError(
-                    "RSA algorithm support is mandated by Java Language Specification. See https://docs.oracle.com/javase/7/docs/api/java/security/KeyFactory.html");
+            throw new IOException("Algorithm required for parsing is not implemented", e);
+        } catch (AssertionError e) {
+            // when using the FIPS BC variety org.bouncycastle.crypto.fips.FipsUnapprovedOperationError can be throw
+            // if the encoded object is not FIPS compliant.
+            // there are no known subclasses so just match on the classname.
+            if (e.getClass().getName().equals("org.bouncycastle.crypto.fips.FipsUnapprovedOperationError")) {
+                UnrecoverableKeyException unrecoverableKeyEx =
+                        new UnrecoverableKeyException("Provided Object is not FIPS 140 compliant");
+                unrecoverableKeyEx.initCause(e);
+                throw unrecoverableKeyEx;
+            }
+            throw e;
         }
     }
 
