@@ -65,7 +65,7 @@
   <properties>
     <revision>1.78.1</revision>
     <changelist>999999-SNAPSHOT</changelist>
-    <jenkins.version>2.361.4</jenkins.version>
+    <jenkins.version>2.479.1</jenkins.version>
     <useBeta>true</useBeta>
     <spotless.check.skip>false</spotless.check.skip>
   </properties>
