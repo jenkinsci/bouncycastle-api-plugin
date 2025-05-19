@@ -26,10 +26,11 @@ package jenkins.bouncycastle;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.contentOf;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.io.File;
 import java.io.IOException;
@@ -39,28 +40,26 @@ import java.security.KeyPair;
 import java.security.PublicKey;
 import java.security.Security;
 import java.security.cert.Certificate;
-import java.util.Arrays;
 import java.util.List;
 import jenkins.bouncycastle.api.PEMEncodable;
 import org.apache.commons.io.FileUtils;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.util.encoders.Base64;
-import org.junit.AfterClass;
-import org.junit.BeforeClass;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.TemporaryFolder;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
 import org.jvnet.hudson.test.Issue;
 
-public class EncodingDecodingTest {
+class EncodingDecodingTest {
 
-    @BeforeClass
-    public static void setUpBC() {
+    @BeforeAll
+    static void setUpBC() {
         Security.addProvider(new BouncyCastleProvider());
     }
 
-    @AfterClass
-    public static void cleanupProvider() {
+    @AfterAll
+    static void cleanupProvider() {
         Security.removeProvider(BouncyCastleProvider.PROVIDER_NAME);
     }
 
@@ -82,11 +81,11 @@ public class EncodingDecodingTest {
 
     private static final String PRIVATE_KEY_PW = "test";
 
-    @Rule
-    public TemporaryFolder folder = new TemporaryFolder();
+    @TempDir
+    private File folder;
 
-    @BeforeClass
-    public static void setUpClass() throws URISyntaxException {
+    @BeforeAll
+    static void setUpClass() throws URISyntaxException {
         PRIVATE_KEY_PEM = getResourceFile("private-key.pem");
         PRIVATE_KEY_PW_PEM = getResourceFile("private-key-with-password.pem");
         PRIVATE_KEY_PW_PKCS8 = getResourceFile("private-key-with-password.pkcs8");
@@ -107,7 +106,7 @@ public class EncodingDecodingTest {
     }
 
     @Test
-    public void testReadPrivateKeyPEM() throws Exception {
+    void testReadPrivateKeyPEM() throws Exception {
         PEMEncodable pemEnc = PEMEncodable.read(PRIVATE_KEY_PEM);
 
         assertEquals(
@@ -120,7 +119,7 @@ public class EncodingDecodingTest {
     }
 
     @Test
-    public void testReadPrivateKeyWithPasswordPEM() throws Exception {
+    void testReadPrivateKeyWithPasswordPEM() throws Exception {
         PEMEncodable pemEnc = PEMEncodable.read(PRIVATE_KEY_PW_PEM, PRIVATE_KEY_PW.toCharArray());
 
         assertEquals(
@@ -134,7 +133,7 @@ public class EncodingDecodingTest {
 
     @Test
     @Issue(value = "JENKINS-66394")
-    public void testReadPrivateKeyWithPasswordPKCS8() throws Exception {
+    void testReadPrivateKeyWithPasswordPKCS8() throws Exception {
         PEMEncodable pemEnc = PEMEncodable.read(PRIVATE_KEY_PW_PKCS8, PRIVATE_KEY_PW.toCharArray());
 
         assertEquals(
@@ -147,28 +146,28 @@ public class EncodingDecodingTest {
     }
 
     @Test
-    public void testReadOnlyPrivateKeyPEM() throws Exception {
-        File onlyPrivate = folder.newFile("from-private.prm");
+    void testReadOnlyPrivateKeyPEM() throws Exception {
+        File onlyPrivate = File.createTempFile("from-private.prm", null, folder);
 
         PEMEncodable pemEnc = PEMEncodable.read(PRIVATE_KEY_PEM);
         PEMEncodable pemEncOnlyPrivate = PEMEncodable.create(pemEnc.toPrivateKey());
 
         pemEncOnlyPrivate.write(onlyPrivate);
-        assertTrue(Arrays.equals(
+        assertArrayEquals(
                 pemEncOnlyPrivate.toPrivateKey().getEncoded(),
-                pemEnc.toPrivateKey().getEncoded()));
+                pemEnc.toPrivateKey().getEncoded());
         assertThat(contentOf(onlyPrivate)).isEqualToNormalizingNewlines(contentOf(PRIVATE_KEY_PEM));
     }
 
     @Test
-    public void testReadPublicKeyPEM() throws Exception {
+    void testReadPublicKeyPEM() throws Exception {
         PEMEncodable pemEnc = PEMEncodable.read(PUBLIC_KEY_PEM);
 
         assertEquals(PUBLIC_KEY, new String(Base64.encode(pemEnc.toPublicKey().getEncoded()), StandardCharsets.UTF_8));
     }
 
     @Test
-    public void testReadInexistentFromPublicKey() throws Exception {
+    void testReadInexistentFromPublicKey() throws Exception {
         PEMEncodable pemEnc = PEMEncodable.read(PUBLIC_KEY_PEM);
         assertNull(pemEnc.toPrivateKey());
         assertNull(pemEnc.toKeyPair());
@@ -176,7 +175,7 @@ public class EncodingDecodingTest {
     }
 
     @Test
-    public void testReadInexistentFromPrivateKey() throws Exception {
+    void testReadInexistentFromPrivateKey() throws Exception {
         PEMEncodable pemEnc = PEMEncodable.read(PRIVATE_KEY_PEM);
 
         PEMEncodable pemEncOnlyPrivate = PEMEncodable.create(pemEnc.toKeyPair().getPrivate());
@@ -187,7 +186,7 @@ public class EncodingDecodingTest {
     }
 
     @Test
-    public void testReadCertificatePEM() throws Exception {
+    void testReadCertificatePEM() throws Exception {
         PEMEncodable pemEncCer = PEMEncodable.read(CERTIFICATE_PEM);
         PEMEncodable pemEncKey = PEMEncodable.read(CERTIFICATE_PUBLIC_KEY_PEM);
 
@@ -197,7 +196,7 @@ public class EncodingDecodingTest {
     }
 
     @Test
-    public void testReadCertificateWithPasswordPEM() throws Exception {
+    void testReadCertificateWithPasswordPEM() throws Exception {
         PEMEncodable pemEncCer = PEMEncodable.read(CERTIFICATE_PW_PEM);
         PEMEncodable pemEncKey = PEMEncodable.read(CERTIFICATE_PUBLIC_KEY_PW_PEM);
 
@@ -207,8 +206,8 @@ public class EncodingDecodingTest {
     }
 
     @Test
-    public void testWritePublicKeyPEM() throws Exception {
-        File pemFileNew = folder.newFile("public-key-test.pem");
+    void testWritePublicKeyPEM() throws Exception {
+        File pemFileNew = File.createTempFile("public-key-test.pem", null, folder);
 
         PEMEncodable pemEnc = PEMEncodable.read(PUBLIC_KEY_PEM);
         pemEnc.write(pemFileNew);
@@ -217,8 +216,8 @@ public class EncodingDecodingTest {
     }
 
     @Test
-    public void testWritePrivateKeyPEM() throws Exception {
-        File pemFileNew = folder.newFile("private-key-test.pem");
+    void testWritePrivateKeyPEM() throws Exception {
+        File pemFileNew = File.createTempFile("private-key-test.pem", null, folder);
 
         PEMEncodable pemEnc = PEMEncodable.read(PRIVATE_KEY_PEM);
         pemEnc.write(pemFileNew);
@@ -227,8 +226,8 @@ public class EncodingDecodingTest {
     }
 
     @Test
-    public void testWriteCertificatePEM() throws Exception {
-        File pemFileNew = folder.newFile("certificate-test.pem");
+    void testWriteCertificatePEM() throws Exception {
+        File pemFileNew = File.createTempFile("certificate-test.pem", null, folder);
 
         PEMEncodable pemEnc = PEMEncodable.read(CERTIFICATE_PW_PEM);
         pemEnc.write(pemFileNew);
@@ -237,8 +236,8 @@ public class EncodingDecodingTest {
     }
 
     @Test
-    public void testCreationFromObjectPublicKeyPEM() throws Exception {
-        File pemFileNew = folder.newFile("public-key-test.pem");
+    void testCreationFromObjectPublicKeyPEM() throws Exception {
+        File pemFileNew = File.createTempFile("public-key-test.pem", null, folder);
 
         PEMEncodable pemEnc = PEMEncodable.read(PUBLIC_KEY_PEM);
         PEMEncodable.create(pemEnc.toPublicKey()).write(pemFileNew);
@@ -247,8 +246,8 @@ public class EncodingDecodingTest {
     }
 
     @Test
-    public void testCreationFromObjectPrivateKeyPEM() throws Exception {
-        File pemFileNew = folder.newFile("private-key-test.pem");
+    void testCreationFromObjectPrivateKeyPEM() throws Exception {
+        File pemFileNew = File.createTempFile("private-key-test.pem", null, folder);
 
         PEMEncodable pemEnc = PEMEncodable.read(PRIVATE_KEY_PEM);
         PEMEncodable.create(pemEnc.toKeyPair()).write(pemFileNew);
@@ -258,28 +257,31 @@ public class EncodingDecodingTest {
 
     @Test
     @Issue(value = "JENKINS-35661")
-    public void testReadKeyPairFromPCKS8PEM() throws Exception {
+    void testReadKeyPairFromPCKS8PEM() throws Exception {
         PEMEncodable pemEnc = PEMEncodable.read(getResourceFile("private-key-pcks8.pem"));
         assertNotNull(pemEnc.toKeyPair());
         assertNotNull(pemEnc.toPrivateKey());
         assertNotNull(pemEnc.toPublicKey());
     }
 
-    @Test(expected = IOException.class)
+    @Test
     @Issue(value = "JENKINS-41978")
-    public void testInvalidPEM() throws Exception {
-        PEMEncodable.decode(FileUtils.readFileToString(getResourceFile("invalid.pem"), StandardCharsets.UTF_8));
+    void testInvalidPEM() {
+        assertThrows(
+                IOException.class,
+                () -> PEMEncodable.decode(
+                        FileUtils.readFileToString(getResourceFile("invalid.pem"), StandardCharsets.UTF_8)));
     }
 
     @Test
-    public void testReadingCertAndKeyPEM() throws Exception {
+    void testReadingCertAndKeyPEM() throws Exception {
         List<PEMEncodable> pems = PEMEncodable.readAll(CERTIFICATE_AND_PRIVATE_KEY_PEM);
         assertThat(pems).hasSize(2);
         assertCertPublicKeyMatches(pems.get(0).toCertificate(), pems.get(1).toKeyPair());
     }
 
     @Test
-    public void testReadingCertAndKeyPassPEM() throws Exception {
+    void testReadingCertAndKeyPassPEM() throws Exception {
         List<PEMEncodable> pems =
                 PEMEncodable.readAll(CERTIFICATE_AND_PRIVATE_KEY_PW_PEM, PRIVATE_KEY_PW.toCharArray());
         assertThat(pems).hasSize(2);
