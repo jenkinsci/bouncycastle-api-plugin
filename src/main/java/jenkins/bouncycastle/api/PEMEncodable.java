@@ -49,10 +49,10 @@ import java.security.spec.InvalidKeySpecException;
 import java.security.spec.RSAPublicKeySpec;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HexFormat;
 import java.util.List;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
-import org.apache.commons.codec.binary.Hex;
 import org.apache.commons.io.FileUtils;
 import org.bouncycastle.asn1.pkcs.PrivateKeyInfo;
 import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo;
@@ -84,6 +84,7 @@ public final class PEMEncodable {
     @NonNull
     private final Object object;
 
+    private static final HexFormat HEX_FORMAT = HexFormat.ofDelimiter(":");
     private static final Provider BOUNCY_CASTLE_PROVIDER;
 
     static {
@@ -476,7 +477,7 @@ public final class PEMEncodable {
         if (key == null) {
             return null;
         }
-        return hexEncode(getKeyDigestSHA1(key));
+        return HEX_FORMAT.formatHex(getKeyDigestSHA1(key));
     }
 
     /**
@@ -492,7 +493,7 @@ public final class PEMEncodable {
         if (key == null) {
             return null;
         }
-        return hexEncode(getKeyDigestMD5(key));
+        return HEX_FORMAT.formatHex(getKeyDigestMD5(key));
     }
 
     /**
@@ -541,25 +542,6 @@ public final class PEMEncodable {
         MessageDigest md = MessageDigest.getInstance(algorithm);
         md.update(k.getEncoded());
         return md.digest();
-    }
-
-    /**
-     * Encode {@link byte[]} in hex formated string "ab:cd:ef:...:12"
-     *
-     * @param data to be encoded
-     * @return hex formated string "ab:cd:ef:...:12"
-     */
-    @NonNull
-    private static String hexEncode(@NonNull byte[] data) {
-        char[] hex = Hex.encodeHex(data);
-        StringBuilder buf = new StringBuilder(hex.length + Math.max(0, hex.length / 2 - 1));
-        for (int i = 0; i < hex.length; i += 2) {
-            if (i > 0) {
-                buf.append(':');
-            }
-            buf.append(hex, i, 2);
-        }
-        return buf.toString();
     }
 
     private static final Logger LOGGER = Logger.getLogger(PEMEncodable.class.getName());
