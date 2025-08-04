@@ -1,37 +1,37 @@
 package jenkins.bouncycastle.api;
 
-import static org.junit.Assert.assertNull;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import hudson.remoting.Channel;
 import hudson.slaves.DumbSlave;
+import java.io.Serial;
 import java.security.Provider;
 import java.security.Security;
 import java.util.stream.IntStream;
 import jenkins.security.MasterToSlaveCallable;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
-import org.junit.AfterClass;
-import org.junit.Assert;
-import org.junit.BeforeClass;
-import org.junit.Rule;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
 import org.jvnet.hudson.test.JenkinsRule;
+import org.jvnet.hudson.test.junit.jupiter.WithJenkins;
 
-public class InstallBouncyCastleJCAProviderTest {
+@WithJenkins
+class InstallBouncyCastleJCAProviderTest {
 
-    @BeforeClass
-    public static void validateEnv() {
+    @BeforeAll
+    static void validateEnv() {
         assertNull(Security.getProvider(BouncyCastleProvider.PROVIDER_NAME));
     }
 
-    @AfterClass
-    public static void cleanupProvider() {
+    @AfterAll
+    static void cleanupProvider() {
         Security.removeProvider(BouncyCastleProvider.PROVIDER_NAME);
     }
 
-    @Rule
-    public JenkinsRule r = new JenkinsRule();
-
-    private void testRegistration(boolean prioritize) throws Exception {
+    private static void testRegistration(JenkinsRule r, boolean prioritize) throws Exception {
         DumbSlave s = r.createOnlineSlave();
         Channel c = s.getComputer().getChannel();
 
@@ -45,28 +45,29 @@ public class InstallBouncyCastleJCAProviderTest {
 
         int position = c.call(new GetBouncyCastleProviderPosition());
         if (prioritize) {
-            Assert.assertTrue("Expected BC position equal to 2, but got: " + position, position == 2);
+            assertEquals(2, position, "Expected BC position equal to 2, but got: " + position);
         } else {
-            Assert.assertTrue("Expected BC position greater than 2, but got: " + position, position > 2);
+            assertTrue(position > 2, "Expected BC position greater than 2, but got: " + position);
         }
     }
 
     @Test
-    public void testDefaultRegistration() throws Exception {
-        testRegistration(false);
+    void testDefaultRegistration(JenkinsRule r) throws Exception {
+        testRegistration(r, false);
     }
 
     @Test
-    public void testPriorityRegistration() throws Exception {
-        testRegistration(true);
+    void testPriorityRegistration(JenkinsRule r) throws Exception {
+        testRegistration(r, true);
     }
 
     static final class GetBouncyCastleProviderPosition extends MasterToSlaveCallable<Integer, Exception> {
 
+        @Serial
         private static final long serialVersionUID = 1L;
 
         @Override
-        public Integer call() throws Exception {
+        public Integer call() {
             Provider[] providers = Security.getProviders();
             return IntStream.range(0, providers.length)
                     .filter(i -> "BC".equals(providers[i].getName())) // find BC by its name
