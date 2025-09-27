@@ -24,29 +24,28 @@
 
 package jenkins.bouncycastle;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.io.File;
-import java.io.IOException;
 import java.net.URISyntaxException;
 import java.security.NoSuchAlgorithmException;
 import java.security.Security;
-import java.security.UnrecoverableKeyException;
 import jenkins.bouncycastle.api.PEMEncodable;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
-import org.junit.AfterClass;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
 
-public class FingerPrintTest {
+class FingerPrintTest {
 
     private static File PEM_FILE;
     private static final String PRIVATE_KEY_FP = "3c:ee:c2:12:57:5f:d0:73:79:38:d6:aa:ef:91:0a:b8:2c:5f:47:65";
     private static final String PUBLIC_KEY_FP = "e3:cc:f6:5d:0b:bb:8b:ca:32:12:fd:70:98:57:c0:21";
 
-    @BeforeClass
-    public static void setUpBC() throws URISyntaxException {
+    @BeforeAll
+    static void setUpBC() throws URISyntaxException {
         Security.addProvider(new BouncyCastleProvider());
         PEM_FILE = new File(EncodingDecodingTest.class
                 .getClassLoader()
@@ -54,13 +53,13 @@ public class FingerPrintTest {
                 .toURI());
     }
 
-    @AfterClass
-    public static void cleanupProvider() {
+    @AfterAll
+    static void cleanupProvider() {
         Security.removeProvider(BouncyCastleProvider.PROVIDER_NAME);
     }
 
     @Test
-    public void testPrivateFingerprint() throws IOException, UnrecoverableKeyException {
+    void testPrivateFingerprint() throws Exception {
         PEMEncodable pemCodec = PEMEncodable.read(PEM_FILE);
         assertEquals(PRIVATE_KEY_FP, pemCodec.getPrivateKeyFingerprint());
 
@@ -70,7 +69,7 @@ public class FingerPrintTest {
     }
 
     @Test
-    public void testPublicFingerprint() throws IOException, UnrecoverableKeyException {
+    void testPublicFingerprint() throws Exception {
         PEMEncodable pemCodec = PEMEncodable.read(PEM_FILE);
         assertEquals(PUBLIC_KEY_FP, pemCodec.getPublicKeyFingerprint());
 
@@ -79,9 +78,9 @@ public class FingerPrintTest {
         assertNull(pemCodecOnlyPrivate.getPublicKeyFingerprint());
     }
 
-    @Test(expected = NoSuchAlgorithmException.class)
-    public void testUnsuportedCodec() throws IOException, NoSuchAlgorithmException, UnrecoverableKeyException {
+    @Test
+    void testUnsupportedCodec() throws Exception {
         PEMEncodable pemCodec = PEMEncodable.read(PEM_FILE);
-        PEMEncodable.getKeyDigest(pemCodec.toPrivateKey(), "XYZ");
+        assertThrows(NoSuchAlgorithmException.class, () -> PEMEncodable.getKeyDigest(pemCodec.toPrivateKey(), "XYZ"));
     }
 }
