@@ -65,6 +65,8 @@
   <properties>
     <revision>1.82</revision>
     <changelist>999999-SNAPSHOT</changelist>
+    <hpi.bundledArtifacts>bcpg-jdk18on,bcpkix-jdk18on,bcprov-jdk18on,bcutil-jdk18on</hpi.bundledArtifacts>
+    <hpi.strictBundledArtifacts>true</hpi.strictBundledArtifacts>
     <jenkins.version>2.479.1</jenkins.version>
     <useBeta>true</useBeta>
     <spotless.check.skip>false</spotless.check.skip>
