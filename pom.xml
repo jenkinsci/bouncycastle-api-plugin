@@ -70,6 +70,7 @@
     <jenkins.version>2.479.1</jenkins.version>
     <useBeta>true</useBeta>
     <spotless.check.skip>false</spotless.check.skip>
+    <ban-junit4-imports.skip>false</ban-junit4-imports.skip>
   </properties>
 
   <dependencies>
