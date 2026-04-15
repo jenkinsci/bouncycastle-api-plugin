@@ -63,7 +63,7 @@
   </scm>
 
   <properties>
-    <revision>1.83</revision>
+    <revision>1.84</revision>
     <changelist>999999-SNAPSHOT</changelist>
     <hpi.bundledArtifacts>bcpg-jdk18on,bcpkix-jdk18on,bcprov-jdk18on,bcutil-jdk18on</hpi.bundledArtifacts>
     <hpi.strictBundledArtifacts>true</hpi.strictBundledArtifacts>
